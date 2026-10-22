@@ -145,7 +145,7 @@ def esc(s):
     return html.escape(str(s), quote=True)
 
 
-def lessons(entries):
+def lessons(entries, failed):
     by_three = defaultdict(list)
     for e in entries:
         by_three[e["three"]].append(e["label"])
@@ -173,6 +173,11 @@ def lessons(entries):
     else:
         vibe_body = "<p>The jury is still out. 🧑‍⚖️</p>"
     local = sum(e["where"] == "local" for e in entries)
+    struck_out = ""
+    if failed:
+        names = ", ".join(esc(f["label"]) for f in failed)
+        struck_out = (f'<p>⚾ And <b>{len(failed)}</b> {"model" if len(failed) == 1 else "models"} struck out entirely: '
+                      f'every swing, no giraffe ({names}). <a href="#graveyard">See the 🪦 graveyard</a>.</p>')
     return f"""
     <div class="lessons">
       <div class="lesson"><span class="big">📦</span><h3>Which three.js?</h3><ul>{three_items}</ul>
@@ -185,6 +190,7 @@ def lessons(entries):
         <p><b>{detours + fixes}</b> of {len(entries)} giraffes needed a follow-up prompt: {detours} 😵‍💫 to get a file at all,
         {fixes} 🔧 to fix a broken one.
         <b>{local}</b> ran on a laptop.</p>
+        {struck_out}
         <p class="aside">The app around a model shapes the result as much as the model does.</p></div>
       <div class="lesson"><span class="big">🔍</span><h3>Vibe check</h3>{vibe_body}</div>
     </div>"""
@@ -401,7 +407,7 @@ def grave_card(f):
 def render_index(flags, entries, pending, failed):
     graveyard = ""
     if failed:
-        graveyard = ('<h2 class="section graveyard-head">🪦 Giraffe graveyard</h2>\n'
+        graveyard = ('<h2 class="section graveyard-head" id="graveyard">🪦 Giraffe graveyard</h2>\n'
                      '  <p class="aside">Models that never produced a working giraffe. Gone, but not forgotten.</p>\n'
                      f'  <div class="grid">{"".join(grave_card(f) for f in failed)}\n  </div>')
     # Server-side order is "most cursed": lowest GP first, unscored last, ties by name.
@@ -567,7 +573,7 @@ footer {{ border-top: 1px solid var(--line); margin-top: 40px; padding: 24px 0 4
       {f"<li>🪦 {len(failed)} lost</li>" if failed else ""}
     </ul>
   </section>
-  {lessons(entries)}
+  {lessons(entries, failed)}
 
   <div class="herd-head">
     <h2 class="section">The herd</h2>
