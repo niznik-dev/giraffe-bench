@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Giraffe on the loose</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pill-bg: rgba(255, 246, 228, 0.82);
+    --pill-ink: #3a2414;
+    --pill-line: rgba(58, 36, 20, 0.2);
+    --accent: #9c5a24;
+    --page-bg: #e9b77c;
+    color-scheme: light;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --pill-bg: rgba(38, 24, 14, 0.78);
+      --pill-ink: #f6e3c4;
+      --pill-line: rgba(246, 227, 196, 0.22);
+      --accent: #f0b066;
+      --page-bg: #2a1a10;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --pill-bg: rgba(38, 24, 14, 0.78);
+    --pill-ink: #f6e3c4;
+    --pill-line: rgba(246, 227, 196, 0.22);
+    --accent: #f0b066;
+    --page-bg: #2a1a10;
+    color-scheme: dark;
+  }
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: var(--page-bg);
+    overflow: hidden;
+    font-family: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    -webkit-user-select: none; user-select: none;
+  }
+  canvas { position: fixed; inset: 0; display: block; touch-action: none; cursor: grab; }
+  canvas:active { cursor: grabbing; }
+  .panel {
+    position: fixed;
+    background: var(--pill-bg);
+    color: var(--pill-ink);
+    border: 1px solid var(--pill-line);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  .stats {
+    top: calc(16px + env(safe-area-inset-top, 0px));
+    left: 16px;
+    padding: 10px 16px;
+    border-radius: 14px;
+    min-width: 150px;
+  }
+  #state { font-weight: 700; font-size: 20px; letter-spacing: -0.01em; }
+  #dist { font-size: 14px; opacity: 0.8; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .keyhint {
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+    padding: 9px 18px;
+    border-radius: 999px;
+    font-size: 14px;
+    white-space: nowrap;
+  }
+  kbd {
+    font: inherit; font-weight: 600;
+    border: 1px solid var(--pill-line);
+    border-bottom-width: 2px;
+    border-radius: 6px;
+    padding: 0 6px;
+  }
+  .touch-only { display: none; }
+  @media (pointer: coarse) {
+    .touch-only { display: block; }
+    .key-only { display: none; }
+  }
+  .joy {
+    left: calc(24px + env(safe-area-inset-left, 0px));
+    bottom: calc(28px + env(safe-area-inset-bottom, 0px));
+    width: 128px; height: 128px;
+    border-radius: 50%;
+    touch-action: none;
+  }
+  .knob {
+    position: absolute; left: 50%; top: 50%;
+    width: 52px; height: 52px; margin: -26px 0 0 -26px;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0.85;
+  }
+  .run {
+    right: calc(24px + env(safe-area-inset-right, 0px));
+    bottom: calc(52px + env(safe-area-inset-bottom, 0px));
+    width: 92px; height: 92px;
+    border-radius: 50%;
+    font: inherit; font-weight: 700; font-size: 16px;
+    touch-action: none;
+  }
+  .run[aria-pressed="true"] { background: var(--accent); color: var(--page-bg); }
+  .run:focus-visible { outline: 2px solid var(--pill-ink); outline-offset: 3px; }
+</style>
+</head>
+<body>
+<div class="panel stats" aria-live="polite">
+  <div id="state">Standing tall</div>
+  <div id="dist">0 m roamed</div>
+</div>
+<div class="panel keyhint key-only">
+  <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> or arrows to move, hold <kbd>Shift</kbd> to gallop, drag to look around
+</div>
+<div class="panel joy touch-only" id="joy"><div class="knob" id="knob"></div></div>
+<button class="panel run touch-only" id="run" type="button" aria-pressed="false">Gallop</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(() => {
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+
+  // ---------- Renderer, scene, camera ----------
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  document.body.prepend(renderer.domElement);
+
+  const scene = new THREE.Scene();
+  const HORIZON = 0xecb87c;
+  scene.fog = new THREE.Fog(HORIZON, 60, 330);
+  const camera = new THREE.PerspectiveCamera(48, window.innerWidth / window.innerHeight, 0.1, 1200);
+
+  // ---------- Lighting ----------
+  const sunDir = new THREE.Vector3(-0.65, 0.32, -0.69).normalize();
+  scene.add(new THREE.HemisphereLight(0xffe2b8, 0x7a5a32, 0.75));
+  const sun = new THREE.DirectionalLight(0xffd59a, 1.05);
+  sun.castShadow = true;
+  sun.shadow.mapSize.set(2048, 2048);
+  Object.assign(sun.shadow.camera, { left: -18, right: 18, top: 18, bottom: -18, near: 1, far: 90 });
+  sun.shadow.bias = -0.0015;
+  scene.add(sun, sun.target);
+
+  // ---------- Sky + sun ----------
+  {
+    const geo = new THREE.SphereGeometry(600, 32, 16);
+    const cols = [];
+    const top = new THREE.Color(0x6f8fbe), mid = new THREE.Color(0xf0b47a), hor = new THREE.Color(HORIZON);
+    const pos = geo.attributes.position;
+    for (let i = 0; i < pos.count; i++) {
+      const y = pos.getY(i) / 600;
+      const c = y > 0.18 ? mid.clone().lerp(top, Math.min(1, (y - 0.18) / 0.6))
+                         : hor.clone().lerp(mid, Math.max(0, y / 0.18));
+      cols.push(c.r, c.g, c.b);
+    }
+    geo.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
+    scene.add(new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide, fog: false })));
+  }
+  const sunDisc = new THREE.Mesh(new THREE.CircleGeometry(16, 40), new THREE.MeshBasicMaterial({ color: 0xfff3d2, fog: false }));
+  const sunGlow = new THREE.Mesh(new THREE.CircleGeometry(48, 40), new THREE.MeshBasicMaterial({ color: 0xffd9a0, transparent: true, opacity: 0.28, fog: false, depthWrite: false }));
+  sunDisc.position.copy(sunDir).multiplyScalar(520);
+  sunGlow.position.copy(sunDir).multiplyScalar(525);
+  scene.add(sunGlow, sunDisc);
+
+  // ---------- Terrain ----------
+  const heightAt = (x, z) => 0.55 * Math.sin(x * 0.045) * Math.cos(z * 0.038) + 0.25 * Math.sin(x * 0.12 + z * 0.07);
+  {
+    const geo = new THREE.PlaneGeometry(700, 700, 180, 180);
+    geo.rotateX(-Math.PI / 2);
+    const pos = geo.attributes.position;
+    const cols = [];
+    const dry = new THREE.Color(0xd2a45c), dark = new THREE.Color(0xa4783e), olive = new THREE.Color(0x9a8f4c);
+    for (let i = 0; i < pos.count; i++) {
+      const x = pos.getX(i), z = pos.getZ(i);
+      pos.setY(i, heightAt(x, z));
+      const n = 0.5 + 0.5 * Math.sin(x * 0.09) * Math.sin(z * 0.11 + 1.3);
+      const m = 0.5 + 0.5 * Math.sin(x * 0.031 + z * 0.027);
+      const c = dry.clone().lerp(dark, n * 0.55).lerp(olive, m * 0.35);
+      cols.push(c.r, c.g, c.b);
+    }
+    geo.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
+    geo.computeVertexNormals();
+    const ground = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ vertexColors: true }));
+    ground.receiveShadow = true;
+    scene.add(ground);
+  }
+
+  // ---------- Grass ----------
+  {
+    const COUNT = 9000;
+    const blade = new THREE.ConeGeometry(0.06, 0.7, 3);
+    blade.translate(0, 0.35, 0);
+    const mesh = new THREE.InstancedMesh(blade, new THREE.MeshLambertMaterial(), COUNT);
+    const m = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), s = new THREE.Vector3(), p = new THREE.Vector3();
+    const c = new THREE.Color();
+    for (let i = 0; i < COUNT; i++) {
+      const r = Math.sqrt(Math.random()) * 170, a = Math.random() * Math.PI * 2;
+      const x = Math.cos(a) * r, z = Math.sin(a) * r;
+      p.set(x, heightAt(x, z), z);
+      e.set((Math.random() - 0.5) * 0.5, Math.random() * Math.PI, (Math.random() - 0.5) * 0.5);
+      q.setFromEuler(e);
+      const k = 0.6 + Math.random() * 1.1;
+      s.set(k, k * (0.7 + Math.random() * 0.8), k);
+      m.compose(p, q, s);
+      mesh.setMatrixAt(i, m);
+      c.setHSL(0.1 + Math.random() * 0.04, 0.45 + Math.random() * 0.2, 0.45 + Math.random() * 0.18);
+      mesh.setColorAt(i, c);
+    }
+    scene.add(mesh);
+  }
+
+  // ---------- Acacia trees (also obstacles) ----------
+  const barkMat = new THREE.MeshLambertMaterial({ color: 0x4a3322 });
+  const leafMat = new THREE.MeshLambertMaterial({ color: 0x5b6a2e, flatShading: true });
+  const obstacles = [];
+  function acacia(x, z, s) {
+    const g = new THREE.Group();
+    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.32, 4.2, 7), barkMat);
+    trunk.position.y = 2.1; trunk.rotation.z = 0.08;
+    g.add(trunk);
+    [[-1, 0.5], [1, -0.4], [0.2, 1]].forEach(([dx, dz]) => {
+      const br = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.14, 2.2, 6), barkMat);
+      br.position.set(dx * 0.6, 4.7, dz * 0.5);
+      br.rotation.set(dz * 0.5, 0, -dx * 0.55);
+      g.add(br);
+    });
+    const canopyGeo = new THREE.SphereGeometry(1, 9, 6);
+    [[0, 0, 3.4, 0.7], [-1.6, 0.4, 2.2, 0.55], [1.7, -0.3, 2.3, 0.6]].forEach(([cx, cz, w, h]) => {
+      const leaf = new THREE.Mesh(canopyGeo, leafMat);
+      leaf.position.set(cx, 5.8 + h * 0.3, cz);
+      leaf.scale.set(w, h, w * 0.9);
+      g.add(leaf);
+    });
+    g.traverse(o => { if (o.isMesh) o.castShadow = true; });
+    g.position.set(x, heightAt(x, z) - 0.1, z);
+    g.scale.setScalar(s);
+    g.rotation.y = Math.random() * Math.PI * 2;
+    scene.add(g);
+    obstacles.push([x, z, 0.45 * s + 1.1]);
+  }
+  [[14, 22, 1.3], [-48, 14, 1.1], [52, -30, 1.2], [-20, -62, 1.4], [70, 40, 1.0], [-80, -20, 1.2],
+   [18, 75, 1.1], [-60, 70, 1.3], [110, -5, 1.4], [-120, 60, 1.2], [40, -110, 1.1], [-15, 120, 1.0],
+   [-30, -25, 1.2], [85, -75, 1.3], [-95, -90, 1.1], [130, 70, 1.2], [-140, -10, 1.3], [5, -140, 1.2]]
+    .forEach(([x, z, s]) => acacia(x, z, s));
+
+  // ---------- Distant hills ----------
+  {
+    const hillMat = new THREE.MeshLambertMaterial({ color: 0xb98d62 });
+    for (let i = 0; i < 9; i++) {
+      const a = (i / 9) * Math.PI * 2 + 0.3;
+      const hill = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 8), hillMat);
+      hill.position.set(Math.cos(a) * 270, -4, Math.sin(a) * 270);
+      hill.scale.set(40 + Math.random() * 40, 14 + Math.random() * 16, 30 + Math.random() * 20);
+      scene.add(hill);
+    }
+  }
+
+  // ---------- Coat texture ----------
+  function makeCoat() {
+    const N = 256, cv = document.createElement('canvas');
+    cv.width = cv.height = N;
+    const ctx = cv.getContext('2d'), img = ctx.createImageData(N, N);
+    const pts = [];
+    for (let i = 0; i < 38; i++) pts.push([Math.random() * N, Math.random() * N, 0.8 + Math.random() * 0.35]);
+    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+      let d1 = 1e9, d2 = 1e9, idx = 0;
+      for (let k = 0; k < pts.length; k++) {
+        let dx = Math.abs(x - pts[k][0]), dy = Math.abs(y - pts[k][1]);
+        dx = Math.min(dx, N - dx); dy = Math.min(dy, N - dy);
+        const d = Math.sqrt(dx * dx + dy * dy);
+        if (d < d1) { d2 = d1; d1 = d; idx = k; } else if (d < d2) d2 = d;
+      }
+      const o = (y * N + x) * 4;
+      if (d2 - d1 < 4.5) { img.data[o] = 238; img.data[o + 1] = 216; img.data[o + 2] = 172; }
+      else { const v = pts[idx][2]; img.data[o] = 158 * v; img.data[o + 1] = 88 * v; img.data[o + 2] = 40 * v; }
+      img.data[o + 3] = 255;
+    }
+    ctx.putImageData(img, 0, 0);
+    const tex = new THREE.CanvasTexture(cv);
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    return tex;
+  }
+  const baseCoat = makeCoat();
+  const coatMat = (rx, ry) => {
+    const t = baseCoat.clone(); t.needsUpdate = true; t.repeat.set(rx, ry);
+    return new THREE.MeshLambertMaterial({ map: t });
+  };
+  const bodyMat = coatMat(2, 2), neckMat = coatMat(1, 2.5), legMat = coatMat(1, 1.2), headMat = coatMat(0.7, 0.7);
+  const creamMat = new THREE.MeshLambertMaterial({ color: 0xe9d3a6 });
+  const darkMat = new THREE.MeshLambertMaterial({ color: 0x2e1c10 });
+  const maneMat = new THREE.MeshLambertMaterial({ color: 0x6b3e1c });
+
+  // ---------- Giraffe ----------
+  const giraffe = new THREE.Group();
+  const body = new THREE.Group();
+  body.position.y = 2.72;
+  giraffe.add(body);
+  const torso = new THREE.Mesh(new THREE.SphereGeometry(1, 28, 18), bodyMat);
+  torso.scale.set(0.62, 0.72, 1.28);
+  torso.rotation.x = -0.16;
+  body.add(torso);
+
+  const neckPivot = new THREE.Group();
+  neckPivot.position.set(0, 0.38, 0.95);
+  body.add(neckPivot);
+  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.36, 2.7, 14), neckMat);
+  neck.position.y = 1.35;
+  neckPivot.add(neck);
+  const mane = new THREE.Mesh(new THREE.BoxGeometry(0.06, 2.5, 0.12), maneMat);
+  mane.position.set(0, 1.35, -0.25);
+  mane.rotation.x = 0.06;
+  neckPivot.add(mane);
+
+  const head = new THREE.Group();
+  head.position.y = 2.68;
+  neckPivot.add(head);
+  const skull = new THREE.Mesh(new THREE.SphereGeometry(1, 18, 12), headMat);
+  skull.scale.set(0.2, 0.22, 0.32);
+  skull.position.z = 0.08;
+  head.add(skull);
+  const muzzle = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.17, 0.5, 12), creamMat);
+  muzzle.rotation.x = Math.PI / 2;
+  muzzle.position.set(0, -0.05, 0.45);
+  head.add(muzzle);
+  const nose = new THREE.Mesh(new THREE.SphereGeometry(0.12, 12, 8), creamMat);
+  nose.position.set(0, -0.06, 0.7);
+  nose.scale.set(1, 0.85, 0.8);
+  head.add(nose);
+  [-1, 1].forEach(sx => {
+    const oss = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.05, 0.28, 8), headMat);
+    oss.position.set(sx * 0.08, 0.3, -0.06);
+    oss.rotation.z = -sx * 0.12;
+    head.add(oss);
+    const tip = new THREE.Mesh(new THREE.SphereGeometry(0.055, 8, 6), darkMat);
+    tip.position.set(sx * 0.098, 0.45, -0.06);
+    head.add(tip);
+    const ear = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.24, 8), creamMat);
+    ear.position.set(sx * 0.24, 0.16, -0.12);
+    ear.rotation.z = -sx * 1.2;
+    head.add(ear);
+    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.04, 8, 6), darkMat);
+    eye.position.set(sx * 0.17, 0.07, 0.14);
+    head.add(eye);
+  });
+
+  const tailPivot = new THREE.Group();
+  tailPivot.position.set(0, 0.12, -1.22);
+  body.add(tailPivot);
+  const tail = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.05, 1.1, 6), bodyMat);
+  tail.position.y = -0.55;
+  tailPivot.add(tail);
+  const tuft = new THREE.Mesh(new THREE.SphereGeometry(0.1, 8, 6), darkMat);
+  tuft.scale.set(0.8, 2, 0.8);
+  tuft.position.y = -1.18;
+  tailPivot.add(tuft);
+
+  function makeLeg(x, y, z, upper, lower, walkOff, runOff) {
+    const hip = new THREE.Group();
+    hip.position.set(x, y, z);
+    const u = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.1, upper, 10), legMat);
+    u.position.y = -upper / 2;
+    hip.add(u);
+    const knee = new THREE.Group();
+    knee.position.y = -upper;
+    hip.add(knee);
+    knee.add(new THREE.Mesh(new THREE.SphereGeometry(0.1, 10, 8), legMat));
+    const l = new THREE.Mesh(new THREE.CylinderGeometry(0.085, 0.07, lower - 0.12, 10), creamMat);
+    l.position.y = -(lower - 0.12) / 2;
+    knee.add(l);
+    const hoof = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.11, 0.14, 10), darkMat);
+    hoof.position.y = -lower + 0.07;
+    knee.add(hoof);
+    body.add(hip);
+    return { hip, knee, lower, walkOff, runOff, front: z > 0 };
+  }
+  // Walk = pace (same-side legs together). Gallop = fronts together-ish, hinds together-ish.
+  const legs = [
+    makeLeg( 0.3,  0.05,  0.85, 1.42, 1.35, 0,       0),
+    makeLeg(-0.3,  0.05,  0.85, 1.42, 1.35, Math.PI, 0.35),
+    makeLeg( 0.3, -0.18, -0.88, 1.27, 1.27, 0,       Math.PI),
+    makeLeg(-0.3, -0.18, -0.88, 1.27, 1.27, Math.PI, Math.PI + 0.35),
+  ];
+  giraffe.traverse(o => { if (o.isMesh) o.castShadow = true; });
+  scene.add(giraffe);
+
+  // ---------- Dust puffs ----------
+  const dustGeo = new THREE.SphereGeometry(0.25, 8, 6);
+  const dust = [];
+  for (let i = 0; i < 60; i++) {
+    const m = new THREE.Mesh(dustGeo, new THREE.MeshLambertMaterial({ color: 0xd9b27a, transparent: true, opacity: 0, depthWrite: false }));
+    m.visible = false; m.userData.life = 0;
+    scene.add(m); dust.push(m);
+  }
+  let dustIdx = 0, dustTimer = 0;
+  const tmpV = new THREE.Vector3();
+  function spawnDust() {
+    const leg = legs[(Math.random() * 4) | 0];
+    tmpV.set(0, -leg.lower + 0.05, 0);
+    leg.knee.localToWorld(tmpV);
+    const m = dust[dustIdx++ % dust.length];
+    m.position.set(tmpV.x + (Math.random() - 0.5) * 0.4, heightAt(tmpV.x, tmpV.z) + 0.15, tmpV.z + (Math.random() - 0.5) * 0.4);
+    m.userData.life = 1; m.visible = true;
+  }
+
+  // ---------- Input ----------
+  const keys = {};
+  const blockKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'];
+  addEventListener('keydown', e => { keys[e.code] = true; if (blockKeys.includes(e.code)) e.preventDefault(); });
+  addEventListener('keyup', e => { keys[e.code] = false; });
+  addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
+
+  const joyEl = document.getElementById('joy'), knob = document.getElementById('knob');
+  const joy = { active: false, x: 0, y: 0 };
+  function joyMove(e) {
+    const r = joyEl.getBoundingClientRect();
+    let dx = (e.clientX - (r.left + r.width / 2)) / (r.width / 2);
+    let dy = (e.clientY - (r.top + r.height / 2)) / (r.height / 2);
+    const len = Math.hypot(dx, dy);
+    if (len > 1) { dx /= len; dy /= len; }
+    joy.x = dx; joy.y = dy;
+    knob.style.transform = `translate(${dx * 38}px, ${dy * 38}px)`;
+  }
+  joyEl.addEventListener('pointerdown', e => { joy.active = true; joyEl.setPointerCapture(e.pointerId); joyMove(e); });
+  joyEl.addEventListener('pointermove', e => { if (joy.active) joyMove(e); });
+  const joyEnd = () => { joy.active = false; joy.x = joy.y = 0; knob.style.transform = ''; };
+  joyEl.addEventListener('pointerup', joyEnd);
+  joyEl.addEventListener('pointercancel', joyEnd);
+
+  const runBtn = document.getElementById('run');
+  let runToggle = false;
+  runBtn.addEventListener('click', () => { runToggle = !runToggle; runBtn.setAttribute('aria-pressed', runToggle); });
+
+  // Camera orbit by dragging the scene
+  let yaw = Math.PI, pitch = 0.2, dist = 16, lastDrag = -1e9;
+  let dragging = false, lastX = 0, lastY = 0;
+  const cv = renderer.domElement;
+  cv.addEventListener('pointerdown', e => { dragging = true; lastX = e.clientX; lastY = e.clientY; cv.setPointerCapture(e.pointerId); });
+  cv.addEventListener('pointermove', e => {
+    if (!dragging) return;
+    yaw -= (e.clientX - lastX) * 0.006;
+    pitch = clamp(pitch + (e.clientY - lastY) * 0.004, 0.03, 1.2);
+    lastX = e.clientX; lastY = e.clientY; lastDrag = performance.now();
+  });
+  const dragEnd = () => { dragging = false; };
+  cv.addEventListener('pointerup', dragEnd);
+  cv.addEventListener('pointercancel', dragEnd);
+  cv.addEventListener('wheel', e => { e.preventDefault(); dist = clamp(dist * (1 + e.deltaY * 0.001), 7, 45); }, { passive: false });
+
+  // ---------- Game state ----------
+  const WALK = 2.8, GALLOP = 10, BACK = 1.3, WORLD_R = 150;
+  let heading = 0, speed = 0, turnVel = 0, phase = 0, idleT = 0, roamed = 0;
+  giraffe.position.set(0, heightAt(0, 0), 0);
+
+  const stateEl = document.getElementById('state'), distEl = document.getElementById('dist');
+  let lastState = '', lastDist = -1;
+
+  function pose(p, amp, run, t) {
+    const swing = lerp(0.36, 0.62, run) * amp;
+    const lift = lerp(0.75, 1.15, run) * amp;
+    legs.forEach(leg => {
+      const ph = p + lerp(leg.walkOff, leg.runOff, run);
+      leg.hip.rotation.x = -Math.sin(ph) * swing * (leg.front ? 1 : 0.9);
+      leg.knee.rotation.x = Math.max(0, Math.cos(ph)) * lift * (leg.front ? 1 : 0.8);
+    });
+    body.position.y = 2.72 + amp * lerp(0.05 * Math.cos(2 * p), 0.16 * Math.cos(p), run);
+    body.rotation.x = 0.07 * Math.sin(p) * run * amp;
+    body.rotation.z = 0.035 * Math.sin(p) * amp * (1 - run) - turnVel * speed * 0.006;
+    const neckBase = lerp(0.42, 0.78, run);
+    const neckSwing = amp * lerp(0.07 * Math.sin(2 * p + 0.6), 0.2 * Math.sin(p + 1.2), run);
+    const idleSway = (1 - amp) * 0.04 * Math.sin(t * 0.7);
+    neckPivot.rotation.x = neckBase + neckSwing + idleSway;
+    neckPivot.rotation.y = (1 - amp) * 0.25 * Math.sin(t * 0.3) + turnVel * 0.12;
+    head.rotation.x = 0.2 - neckPivot.rotation.x;
+    tailPivot.rotation.x = lerp(0.25, 1.25, run) + 0.12 * Math.sin(t * 1.3 + p);
+    tailPivot.rotation.z = 0.15 * Math.sin(t * 0.9);
+  }
+
+  function updateCamera(snap) {
+    const h = heading + yaw;
+    const target = new THREE.Vector3(giraffe.position.x, giraffe.position.y + 3.4, giraffe.position.z);
+    const want = new THREE.Vector3(
+      target.x + Math.sin(h) * Math.cos(pitch) * dist,
+      target.y + Math.sin(pitch) * dist,
+      target.z + Math.cos(h) * Math.cos(pitch) * dist
+    );
+    const floor = heightAt(want.x, want.z) + 0.6;
+    if (want.y < floor) want.y = floor;
+    if (snap) camera.position.copy(want); else camera.position.lerp(want, 0.1);
+    camera.lookAt(target);
+  }
+
+  // ---------- Loop ----------
+  const clock = new THREE.Clock();
+  updateCamera(true);
+
+  function frame() {
+    const dt = Math.min(clock.getDelta(), 0.05);
+    idleT += dt;
+
+    let fwd = (keys.KeyW || keys.ArrowUp ? 1 : 0) - (keys.KeyS || keys.ArrowDown ? 1 : 0);
+    let turn = (keys.KeyA || keys.ArrowLeft ? 1 : 0) - (keys.KeyD || keys.ArrowRight ? 1 : 0);
+    let wantRun = keys.ShiftLeft || keys.ShiftRight || runToggle;
+    if (joy.active) {
+      fwd = clamp(-joy.y * 1.4, -1, 1);
+      turn = clamp(-joy.x * 1.3, -1, 1);
+    }
+
+    const target = fwd > 0 ? fwd * (wantRun ? GALLOP : WALK) : fwd * BACK;
+    speed += (target - speed) * Math.min(1, dt * (Math.abs(target) > Math.abs(speed) ? 1.6 : 2.6));
+    const run = clamp((Math.abs(speed) - 3) / 5, 0, 1);
+    const turnRate = lerp(1.7, 1.0, run);
+    turnVel += (turn * turnRate - turnVel) * Math.min(1, dt * 6);
+    heading += turnVel * dt;
+
+    // Move, then stay out of trees and inside the plains
+    const pos = giraffe.position;
+    pos.x += Math.sin(heading) * speed * dt;
+    pos.z += Math.cos(heading) * speed * dt;
+    for (const [ox, oz, r] of obstacles) {
+      const dx = pos.x - ox, dz = pos.z - oz, d = Math.hypot(dx, dz);
+      if (d < r && d > 1e-4) { pos.x = ox + dx / d * r; pos.z = oz + dz / d * r; }
+    }
+    const fromCenter = Math.hypot(pos.x, pos.z);
+    if (fromCenter > WORLD_R) { pos.x *= WORLD_R / fromCenter; pos.z *= WORLD_R / fromCenter; }
+    pos.y = heightAt(pos.x, pos.z);
+    giraffe.rotation.y = heading;
+    roamed += Math.abs(speed) * dt;
+
+    // Gait
+    const amp = clamp(Math.max(Math.abs(speed) / 1.5, Math.abs(turnVel) * 0.6), 0, 1);
+    const stride = lerp(4.0, 8.0, run);
+    phase += Math.PI * 2 * (Math.abs(speed) / stride) * Math.sign(speed || 1) * dt + Math.abs(turnVel) * 1.2 * dt;
+    pose(phase, amp, run, idleT);
+    giraffe.updateMatrixWorld(true);
+
+    // Dust when galloping
+    if (run > 0.4) {
+      dustTimer += dt;
+      while (dustTimer > 0.035) { dustTimer -= 0.035; spawnDust(); }
+    }
+    for (const m of dust) {
+      if (!m.visible) continue;
+      m.userData.life -= dt / 1.1;
+      if (m.userData.life <= 0) { m.visible = false; continue; }
+      const l = m.userData.life;
+      m.scale.setScalar(1 + (1 - l) * 3.5);
+      m.position.y += 0.5 * dt;
+      m.material.opacity = l * 0.4;
+    }
+
+    // Camera drifts back behind the giraffe while moving
+    if (!dragging && performance.now() - lastDrag > 1500 && Math.abs(speed) > 0.5) {
+      const TAU = Math.PI * 2;
+      const diff = ((Math.PI - yaw) % TAU + TAU + Math.PI) % TAU - Math.PI;
+      yaw += diff * Math.min(1, dt * 1.2);
+    }
+    updateCamera(false);
+    sun.position.copy(pos).addScaledVector(sunDir, 45);
+    sun.target.position.copy(pos);
+    sunDisc.lookAt(camera.position);
+    sunGlow.lookAt(camera.position);
+
+    // HUD
+    const label = Math.abs(speed) < 0.2 && Math.abs(turnVel) < 0.1 ? 'Standing tall'
+                : speed < 0 ? 'Backing up'
+                : run > 0.6 ? 'Galloping free' : 'Strolling';
+    if (label !== lastState) { stateEl.textContent = label; lastState = label; }
+    const meters = Math.floor(roamed);
+    if (meters !== lastDist) { distEl.textContent = `${meters.toLocaleString()} m roamed`; lastDist = meters; }
+
+    renderer.render(scene, camera);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+})();
+</script>
+</body>
+</html>
