@@ -28,17 +28,20 @@ qwen3-27b/
 
 | Part | Rule | Example |
 |------|------|---------|
-| `model-slug` | Lowercase kebab-case; dots and spaces → `-`; drop vendor prefixes | `claude-opus-5-5`, `qwen3-27b`, `gpt-4o` |
+| `model-slug` | Lowercase kebab-case; dots and spaces → `-`; drop vendor prefixes, but keep a product name when the model name is obscure without it | `claude-opus-5-5`, `qwen3-27b`, `chatgpt-sol-6-1` |
 | `YYYY-MM-DD` | Date the page was **generated** (use the date collected if unknown) | `2026-10-22` |
-| `_effort` | Reasoning effort, lowercase, when the model has that setting; omit otherwise | `_low`, `_medium`, `_high`, `_max` |
+| `_effort` | Reasoning effort, lowercase, **no hyphens** (they'd clash with `-n`); omit if the model has no such setting | `_low`, `_medium`, `_high`, `_xhigh`, `_max` |
 | `-n` suffix | Only for duplicates with the same model, day, and effort, starting at `-2` | `2026-10-22_medium-2.html` |
+| `.wrapper` | The original, unedited file, when the entry had to be extracted from a vendor wrapper | `2026-10-22_xhigh.wrapper.html` |
 
 Pages should stay single-file: inline JS/CSS, with three.js loaded from a pinned CDN URL.
+Anything that differs from a clean one-shot run (follow-up prompts, extraction) goes in the gallery's Notes column.
 
 ## Gallery
 
-| Model | Effort | Date | Page |
-|-------|--------|------|------|
-| claude-opus-5-5 | medium | 2026-10-22 | [2026-10-22_medium.html](claude-opus-5-5/2026-10-22_medium.html) |
-| claude-sonnet-5-5 | medium | 2026-10-22 | [2026-10-22_medium.html](claude-sonnet-5-5/2026-10-22_medium.html) |
-| claude-haiku-5-5 | medium | 2026-10-22 | [2026-10-22_medium.html](claude-haiku-5-5/2026-10-22_medium.html) |
+| Model | Effort | Date | Page | Notes |
+|-------|--------|------|------|-------|
+| claude-opus-5-5 | medium | 2026-10-22 | [2026-10-22_medium.html](claude-opus-5-5/2026-10-22_medium.html) | |
+| claude-sonnet-5-5 | medium | 2026-10-22 | [2026-10-22_medium.html](claude-sonnet-5-5/2026-10-22_medium.html) | |
+| claude-haiku-5-5 | medium | 2026-10-22 | [2026-10-22_medium.html](claude-haiku-5-5/2026-10-22_medium.html) | |
+| chatgpt-sol-6-1 | xhigh | 2026-10-22 | [2026-10-22_xhigh.html](chatgpt-sol-6-1/2026-10-22_xhigh.html) | First reply wasn't a standalone HTML file; needed the follow-up *"Is this an HTML file I can download?"* Delivered inside a viewer wrapper; entry is the extracted inner page ([original](chatgpt-sol-6-1/2026-10-22_xhigh.wrapper.html)). |
