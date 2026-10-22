@@ -30,6 +30,8 @@ VIBES = [  # (key, emoji, name, question, points)
     ("wanders", "🚪", "Wanders off", "Leaves the shot while the camera just... watches?", -1),
 ]
 VIBE_KEYS = [v[0] for v in VIBES]
+MEDALS = {"gold": "🥇", "silver": "🥈", "bronze": "🥉"}
+WHIM = "Awarded entirely on the curator's whim, independent of Giraffe Points."
 README_START, README_END = "<!-- gallery:start -->", "<!-- gallery:end -->"
 
 
@@ -58,6 +60,8 @@ def load_entries():
         m = NAME_RE.match(file.stem)
         if not m:
             raise SystemExit(f"bad filename: {path}")
+        if info.get("medal") not in (None, *MEDALS):
+            raise SystemExit(f"{path}: medal must be one of {list(MEDALS)}")
         bad = {k: v for k, v in info.get("vibes", {}).items() if k not in VIBE_KEYS or v not in ("yes", "no")}
         if bad:
             raise SystemExit(f"{path}: bad vibes {bad}; keys {VIBE_KEYS}, values yes/no")
@@ -109,7 +113,10 @@ def readme_gallery(flags, entries, pending, failed):
         penalty = "".join(emoji for key, emoji, *_, pts in VIBES if pts < 0 and e["vibes"].get(key) == "yes")
         unjudged = sum(k not in e["vibes"] for k in VIBE_KEYS)
         vibes = " ".join(filter(None, [bonus and f"+{bonus}", penalty and f"−{penalty}", unjudged and f"❔×{unjudged}"]))
-        lines.append(f"| {e['slug']} | {e['effort']} | {e['date']} | [{name}]({e['path']}) | **{fmt_gp(e)}** | {vibes} | {' '.join(e['flags'])} |")
+        medal = f" {MEDALS[e['medal']]}" if e.get("medal") else ""
+        lines.append(f"| {e['slug']}{medal} | {e['effort']} | {e['date']} | [{name}]({e['path']}) | **{fmt_gp(e)}** | {vibes} | {' '.join(e['flags'])} |")
+    if any(e.get("medal") for e in entries):
+        lines += ["", "🎖️ **Curator's whim:** 🥇🥈🥉 medals are " + WHIM[0].lower() + WHIM[1:]]
     lines += ["", "**Giraffe Points (GP)** = bonuses − penalties. "
               "Bonuses: " + " · ".join(f"{emoji} {name.lower()}" for _, emoji, name, _, pts in VIBES if pts > 0) + ". "
               "Penalties: " + " · ".join(f"{emoji} {name.lower()}" for _, emoji, name, _, pts in VIBES if pts < 0) + "."]
@@ -146,6 +153,23 @@ def write_readme(flags, entries, pending, failed):
 
 def esc(s):
     return html.escape(str(s), quote=True)
+
+
+def podium(entries):
+    medalists = sorted((e for e in entries if e.get("medal")), key=lambda e: ["silver", "gold", "bronze"].index(e["medal"]))  # classic podium: gold in the middle
+    if not medalists:
+        return ""
+    steps = "".join(
+        f'<div class="step {e["medal"]}"><span class="big">{MEDALS[e["medal"]]}</span>'
+        f'<b>{esc(e["label"])}</b><small>{esc(e["effort"])} · {fmt_gp(e)} GP</small></div>'
+        for e in medalists
+    )
+    return f"""
+  <section class="podium">
+    <h2 class="section">🎖️ Curator's whim</h2>
+    <p class="aside">{esc(WHIM)} No rubric, no appeals, no take-backs. 🦒</p>
+    <div class="steps">{steps}</div>
+  </section>"""
 
 
 def lessons(entries, failed):
@@ -232,6 +256,9 @@ def card(e, flags, order):
             spans.append(f'<span class="vibe {state}" title="{esc(name)}: {esc(question)} ({mark})">{emoji}</span>')
         return f'<div class="vibes {label}"><span class="rowlabel" title="{"Bonuses: +1 each" if sign > 0 else "Penalties: −1 each"}">{"+" if sign > 0 else "−"}</span>{"".join(spans)}</div>'
 
+    medal_html = ""
+    if e.get("medal"):
+        medal_html = f' <span class="medal" title="{e["medal"].title()} medal. {esc(WHIM)}">{MEDALS[e["medal"]]}</span>'
     score = gp(e)
     gp_class = "unknown" if score is None else "pos" if score > 0 else "neg" if score < 0 else "zero"
     vibes = vibe_row(+1, "bonus") + vibe_row(-1, "penalty")
@@ -247,7 +274,7 @@ def card(e, flags, order):
       <article class="card" data-order="{order}" data-gp="{'' if score is None else score}" data-size="{e['size_kb']}" data-name="{title}">
         {stage}
         <div class="body">
-          <h3>{title} <span class="flags">{flag_html}</span></h3>
+          <h3>{title}{medal_html} <span class="flags">{flag_html}</span></h3>
           <p class="meta">{esc(e['date'])} <span class="gp {gp_class}" title="Giraffe Points: bonuses minus penalties">{fmt_gp(e)} GP</span></p>
           {vibes}
           <div class="chips">{chip_html}</div>
@@ -512,6 +539,16 @@ h2.section {{ font-size: 1.8rem; margin: 8px 0 14px; }}
 .chip {{ background: var(--chip); border-radius: 999px; padding: 2px 10px; font-size: .85rem; white-space: nowrap; }}
 .flag {{ cursor: help; }}
 .meta {{ display: flex; justify-content: space-between; align-items: center; }}
+.medal {{ cursor: help; font-size: 1.15em; }}
+.podium {{ margin: 0 0 36px; }}
+.steps {{ display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end; }}
+.step {{ flex: 1 1 180px; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px;
+  display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; }}
+.step .big {{ font-size: 2.4rem; line-height: 1.1; }}
+.step small {{ color: var(--muted); }}
+.step.gold {{ border: 2px solid #d4a72c; padding-top: 26px; }}
+.step.silver {{ border: 2px solid #a7adb5; padding-top: 18px; }}
+.step.bronze {{ border: 2px solid #b8763e; }}
 .gp {{ font: 700 1.05rem Fredoka, sans-serif; padding: 2px 12px; border-radius: 999px; background: var(--chip); color: var(--ink); }}
 .gp.pos {{ background: #2f9e55; color: #fff; }} .gp.neg {{ background: #c2475e; color: #fff; }}
 .graveyard-head {{ margin-top: 40px; }}
@@ -577,6 +614,7 @@ footer {{ border-top: 1px solid var(--line); margin-top: 40px; padding: 24px 0 4
     </ul>
   </section>
   {lessons(entries, failed)}
+  {podium(entries)}
 
   <div class="herd-head">
     <h2 class="section">The herd</h2>

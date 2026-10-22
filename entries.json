@@ -28,7 +28,8 @@
         "hocks": "no",
         "frontlegs": "no",
         "flex": "yes"
-      }
+      },
+      "medal": "bronze"
     },
     "claude-sonnet-5-5/2026-10-22_medium.html": {
       "label": "Claude Sonnet 5.5",
@@ -44,7 +45,8 @@
         "hocks": "no",
         "frontlegs": "no",
         "flex": "yes"
-      }
+      },
+      "medal": "silver"
     },
     "claude-haiku-5-5/2026-10-22_medium.html": {
       "label": "Claude Haiku 5.5",
@@ -79,7 +81,8 @@
         "hocks": "yes",
         "frontlegs": "no",
         "flex": "yes"
-      }
+      },
+      "medal": "gold"
     },
     "chatgpt-sol-6-1/2026-10-22_medium.html": {
       "label": "ChatGPT Sol 6.1",

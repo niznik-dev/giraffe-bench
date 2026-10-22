@@ -18,10 +18,10 @@ for the original idea of testing models on 3D creation.
 <!-- gallery:start -->
 | Model | Effort | Date | Page | GP | Vibe check | ⚑ |
 |-------|--------|------|------|----|------------|---|
-| claude-opus-5-5 | medium | 2026-10-22 | [2026-10-22_medium.html](claude-opus-5-5/2026-10-22_medium.html) | **+5** | +🦵🚶🤸🦒🌅 |  |
-| claude-sonnet-5-5 | medium | 2026-10-22 | [2026-10-22_medium.html](claude-sonnet-5-5/2026-10-22_medium.html) | **+5** | +🦵🚶🤸🦒🌅 |  |
+| claude-opus-5-5 🥉 | medium | 2026-10-22 | [2026-10-22_medium.html](claude-opus-5-5/2026-10-22_medium.html) | **+5** | +🦵🚶🤸🦒🌅 |  |
+| claude-sonnet-5-5 🥈 | medium | 2026-10-22 | [2026-10-22_medium.html](claude-sonnet-5-5/2026-10-22_medium.html) | **+5** | +🦵🚶🤸🦒🌅 |  |
 | claude-haiku-5-5 | medium | 2026-10-22 | [2026-10-22_medium.html](claude-haiku-5-5/2026-10-22_medium.html) | **+4** | +🦵🚶🤸🦴🌅 −🔄 |  |
-| chatgpt-sol-6-1 | xhigh | 2026-10-22 | [2026-10-22_xhigh.html](chatgpt-sol-6-1/2026-10-22_xhigh.html) | **+6** | +🦵🚶🤸🦴🦒🌅 | 😵‍💫 |
+| chatgpt-sol-6-1 🥇 | xhigh | 2026-10-22 | [2026-10-22_xhigh.html](chatgpt-sol-6-1/2026-10-22_xhigh.html) | **+6** | +🦵🚶🤸🦴🦒🌅 | 😵‍💫 |
 | chatgpt-sol-6-1 | medium | 2026-10-22 | [2026-10-22_medium.html](chatgpt-sol-6-1/2026-10-22_medium.html) | **+4** | +🦵🚶🤸🦴🦒🌅 −🔄👻 | 😵‍💫 |
 | gemini-4-argon | medium | 2026-10-22 | [2026-10-22_medium.html](gemini-4-argon/2026-10-22_medium.html) | **+5** | +🦵🚶🤸🦴🦒🌅 −🔄 |  |
 | gemini-4-argon | high | 2026-10-22 | [2026-10-22_high.html](gemini-4-argon/2026-10-22_high.html) | **+5** | +🦵🚶🤸🦒🌅 |  |
@@ -32,6 +32,8 @@ for the original idea of testing models on 3D creation.
 | gemma4-12b-q4km | default | 2026-10-22 | [2026-10-22_default.html](gemma4-12b-q4km/2026-10-22_default.html) | **-1** | +🦵 −😱🚪 | 💻 |
 | qwen3-8-27b-nvfp4 | default | 2026-10-22 | [2026-10-22_default.html](qwen3-8-27b-nvfp4/2026-10-22_default.html) | **+0** | +🦵🦒 −😱👻 | 💻 |
 | ornith-1-5-9b-q4km | default | 2026-10-22 | [2026-10-22_default.html](ornith-1-5-9b-q4km/2026-10-22_default.html) | **+1** | +🦵🦒🌅 −😱👻 | 💻 |
+
+🎖️ **Curator's whim:** 🥇🥈🥉 medals are awarded entirely on the curator's whim, independent of Giraffe Points.
 
 **Giraffe Points (GP)** = bonuses − penalties. Bonuses: 🦵 four legs · 🚶 actually walks · 🤸 legs flex · 🦴 proper hocks · 🦒 giraffe-shaped · 🌅 real savannah. Penalties: 😱 nightmare fuel · 🔄 backwards front legs · 👻 ghost giraffe · 🚪 wanders off.
 
