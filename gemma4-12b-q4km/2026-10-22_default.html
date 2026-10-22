@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three.js Giraffe Savannah</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #87CEEB; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+
+<script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+    }
+</script>
+
+<script type="module">
+    import * as THREE from 'three';
+
+    // --- Configuration ---
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x87CEEB); // Sky blue
+    scene.fog = new THREE.Fog(0x87CEEB, 20, 100);
+
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // --- Lighting ---
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    scene.add(ambientLight);
+
+    const sunLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    sunLight.position.set(50, 100, 50);
+    scene.add(sunLight);
+
+    // --- Environment ---
+    // Ground (Savannah)
+    const groundGeo = new THREE.PlaneGeometry(200, 200);
+    const groundMat = new THREE.MeshStandardMaterial({ color: 0xd2b48c }); // Tan color
+    const ground = new THREE.Mesh(groundGeo, groundMat);
+    ground.rotation.x = -Math.PI / 2;
+    scene.add(ground);
+
+    // Trees (Acacias)
+    function createTree(x, z) {
+        const group = new THREE.Group();
+        // Trunk
+        const trunk = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.5, 0.7, 10, 8),
+            new THREE.MeshStandardMaterial({ color: 0x5c4033 })
+        );
+        trunk.position.y = 5;
+        group.add(trunk);
+        // Foliage
+        const canopy = new THREE.Mesh(
+            new THREE.BoxGeometry(6, 2, 6),
+            new THREE.MeshStandardMaterial({ color: 0x228b22 })
+        );
+        canopy.position.y = 10;
+        group.add(canopy);
+        
+        group.position.set(x, 0, z);
+        scene.add(group);
+    }
+
+    // Populate savanna with trees
+    for(let i = 0; i < 40; i++) {
+        let x = (Math.random() - 0.5) * 150;
+        let z = (Math.random() - 0.5) * 150;
+        if (Math.abs(x) > 10 || Math.abs(z) > 10) createTree(x, z);
+    }
+
+    // --- The Giraffe ---
+    const giraffe = new THREE.Group();
+    scene.add(giraffe);
+
+    // Body
+    const body = new THREE.Mesh(
+        new THREE.BoxGeometry(2, 3, 5),
+        new THREE.MeshStandardMaterial({ color: 0xffcc66 })
+    );
+    giraffe.add(body);
+
+    // Neck
+    const neck = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.6, 0.8, 7),
+        new THREE.MeshStandardMaterial({ color: 0xffcc66 })
+    );
+    neck.position.set(0, 3.5, 1.5);
+    neck.rotation.x = -Math.PI / 3;
+    giraffe.add(neck);
+
+    // Head
+    const head = new THREE.Mesh(
+        new THREE.BoxGeometry(1.2, 1, 1.5),
+        new THREE.MeshStandardMaterial({ color: 0xffcc66 })
+    );
+    head.position.set(0, 6, 1.8);
+    giraffe.add(head);
+
+    // Legs (Array to animate them individually)
+    const legGeometry = new THREE.CylinderGeometry(0.3, 0.3, 4);
+    const legMaterial = new THREE.MeshStandardMaterial({ color: 0xffcc66 });
+    
+    const legs = [];
+    const legPositions = [
+        { x: 0.8, z: 1.5 },   // Front Right
+        { x: -0.8, z: 1.5 },  // Front Left
+        { x: 0.8, z: -1.5 },  // Back Right
+        { x: -0.8, z: -1.5 }  // Back Left
+    ];
+
+    for (let i = 0; i < 4; i++) {
+        const leg = new THREE.Mesh(legGeometry, legMaterial);
+        leg.position.set(legPositions[i].x, 2, legPositions[i].z);
+        giraffe.add(leg);
+        legs.push(leg);
+    }
+
+    // --- Animation ---
+    const clock = new THREE.Clock();
+
+    camera.position.set(15, 10, 25);
+    camera.lookAt(0, 0, 0);
+
+    function animate() {
+        requestAnimationFrame(animate);
+        const t = clock.getElapsedTime();
+
+        // Move the giraffe forward
+        giraffe.position.z += 0.05;
+        
+        // Loop the giraffe's position back if it goes too far
+        if (giraffe.position.z > 100) giraffe.position.z = -100;
+
+        // Body Sway
+        giraffe.rotation.z = Math.sin(t * 2) * 0.05;
+        giraffe.position.y = Math.sin(t * 4) * 0.1; // Slight "bob"
+
+        // Leg Animation
+        // We use sine waves with different offsets to make legs move in pairs
+        const walkSpeed = 6;
+        legs[0].rotation.x = Math.sin(t * walkSpeed) * 0.5; // Front Right
+        legs[1].rotation.x = Math.sin(t * walkSpeed) * 0.5; // Front Left
+        
+        // Back legs offset by PI so they move opposite to front legs
+        legs[2].rotation.x = Math.sin(t * walkSpeed + Math.PI) * 0.5; 
+        legs[3].rotation.x = Math.sin(t * walkSpeed + Math.PI) * 0.5;
+
+        // Slowly rotate camera to follow the scene
+        camera.position.x = Math.sin(t * 0.1) * 30;
+        camera.position.z = Math.cos(t * 0.1) * 30;
+        camera.lookAt(0, 0, 0);
+
+        renderer.render(scene, camera);
+    }
+
+    // Handle Resize
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    animate();
+</script>
+</body>
+</html>
