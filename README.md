@@ -9,7 +9,7 @@ giraffe (hopefully) walk.
 
 Started as a live demo for the October 2026 meeting of Princeton Research Computing's
 [LLM Collective](https://researchcomputing.princeton.edu/learn/user-groups/llm-collective).
-Thanks to Pedro Espino for suggesting the giraffe, and to
+Thanks to [Pedro Espino](https://github.com/pilambdaepsilon) for suggesting the giraffe, and to
 [this r/ClaudeAI post](https://www.reddit.com/r/ClaudeAI/comments/1wpq8by/testing_claude_for_3d_creation_max_took_a_whole/)
 for the original idea of testing models on 3D creation.
 
