@@ -7,6 +7,12 @@ A herd of single-page three.js sites, each one an LLM's answer to the same promp
 **🌍 Live gallery: <https://niznik-dev.github.io/giraffe-bench/>.** Click any page below to watch the
 giraffe (hopefully) walk.
 
+Started as a live demo for the October 2026 meeting of Princeton Research Computing's
+[LLM Collective](https://researchcomputing.princeton.edu/learn/user-groups/llm-collective).
+Thanks to Pedro Espino for suggesting the giraffe, and to
+[this r/ClaudeAI post](https://www.reddit.com/r/ClaudeAI/comments/1wpq8by/testing_claude_for_3d_creation_max_took_a_whole/)
+for the original idea of testing models on 3D creation.
+
 ## Gallery
 
 | Model | Effort | Date | Page | Notes |
@@ -16,7 +22,7 @@ giraffe (hopefully) walk.
 | claude-haiku-5-5 | medium | 2026-10-22 | [2026-10-22_medium.html](claude-haiku-5-5/2026-10-22_medium.html) | |
 | chatgpt-sol-6-1 | xhigh | 2026-10-22 | [2026-10-22_xhigh.html](chatgpt-sol-6-1/2026-10-22_xhigh.html) | First reply wasn't obviously an HTML file. Asked *"Is this an HTML file I can download?"* and received a viewer-wrapped HTML file ([original](chatgpt-sol-6-1/2026-10-22_xhigh.wrapper.html)); the giraffe page was recovered from inside it. |
 | chatgpt-sol-6-1 | medium | 2026-10-22 | [2026-10-22_medium.html](chatgpt-sol-6-1/2026-10-22_medium.html) | First reply wasn't obviously an HTML file. Asked *"Is this an HTML file I can download?"* and received a viewer-wrapped HTML file ([original](chatgpt-sol-6-1/2026-10-22_medium.wrapper.html)); the giraffe page was recovered from inside it. |
-| nemotron-3-5-lightning-30b-nvfp4 | think | 2026-10-22 | [2026-10-22_think.html](nemotron-3-5-lightning-30b-nvfp4/2026-10-22_think.html) | Cherry Studio → Ollama (`nemotron-3.5-lightning:30b-mlx`), default thinking. |
+| nemotron-3-5-lightning-30b-nvfp4 | think | 2026-10-22 | [2026-10-22_think.html](nemotron-3-5-lightning-30b-nvfp4/2026-10-22_think.html) | `nemotron-3.5-lightning:30b-mlx`, default thinking. |
 
 ## Contributing
 
@@ -24,6 +30,8 @@ Every entry uses the exact prompt above. If the wording ever changes, record the
 and note which entries used it. Pages should stay single-file: inline JS/CSS, with three.js loaded
 from a pinned CDN URL. Anything that differs from a clean one-shot run (follow-up prompts,
 extraction) goes in the gallery's Notes column.
+
+Local models run through Cherry Studio → Ollama unless noted; their Notes give the Ollama tag.
 
 <details markdown="1">
 <summary><b>Layout</b></summary>
