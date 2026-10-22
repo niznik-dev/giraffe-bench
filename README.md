@@ -45,12 +45,28 @@ Originals: [chatgpt-sol-6-1 xhigh](chatgpt-sol-6-1/2026-10-22_xhigh.wrapper.html
 
 ## Contributing
 
-To add a giraffe:
+Got a giraffe? 🦒 Submissions are welcome, **by pull request only**. Giraffes sent by issue, email or
+DM won't be added. The herd is curated: every entry is reviewed, and spam, joke or low-effort giraffes
+will be politely declined.
 
-1. Save the page as `<model-slug>/<YYYY-MM-DD>[_<effort>].html` (rules below).
+### What a giraffe PR needs
+
+- **Real model output.** The page exactly as the model produced it from the prompt above, with no hand
+  edits or fixes. If you had to pull it out of a wrapper, include the original as `.wrapper.html`.
+- **One model, clearly identified.** Name, version, and effort/thinking setting. For local models, add
+  the quantization, runtime and hardware.
+- **The full story.** Say whether it was one-shot. Note any follow-up prompts, retries or app quirks in
+  the PR description; they become ⚑ flags.
+- **Something new.** A model, version, effort level or runtime that isn't already in the herd.
+
+### Steps
+
+1. Save the page as `<model-slug>/<YYYY-MM-DD>[_<effort>].html` (see the rules below).
 2. Add an entry to `entries.json`: a display label, `hosted` or `local`, and any ⚑ flags.
+   Leave out `vibes`; vibe-check scores are assigned during review.
 3. Run `python build.py` to regenerate `index.html` and the gallery table in this README.
    Don't edit either by hand; the build refuses to run if a folder and `entries.json` disagree.
+4. Open a pull request with the details above.
 
 Every entry uses the exact prompt above. If the wording ever changes, record the new version here
 and note which entries used it. Pages should stay single-file: inline JS/CSS, with three.js loaded
