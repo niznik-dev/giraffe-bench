@@ -1,7 +1,14 @@
 # giraffe-bench 🦒
 
-A herd of single-page three.js sites, each one an LLM's attempt at **a giraffe galloping**.
+A herd of single-page three.js sites, each one an LLM's answer to the same prompt.
 Every file is self-contained: open it in a browser and watch the legs (hopefully) move.
+
+## Prompt
+
+> Please create an animation of a giraffe walking through a savannah environment using Three.js
+
+Every entry uses this exact prompt. If the wording ever changes, record the new version here
+and note which entries used it.
 
 ## Layout
 
