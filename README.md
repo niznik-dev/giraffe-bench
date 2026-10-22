@@ -27,6 +27,7 @@ for the original idea of testing models on 3D creation.
 | muse-glimmer-30b-nvfp4 | default | 2026-10-22 | [2026-10-22_default.html](muse-glimmer-30b-nvfp4/2026-10-22_default.html) | **-1** | +🦵🚶 −😱👻🚪 | 💻 |
 | gemma4-12b-q4km | default | 2026-10-22 | [2026-10-22_default.html](gemma4-12b-q4km/2026-10-22_default.html) | **-1** | +🦵 −😱🚪 | 💻 |
 | qwen3-8-27b-nvfp4 | default | 2026-10-22 | [2026-10-22_default.html](qwen3-8-27b-nvfp4/2026-10-22_default.html) | **+0** | +🦵🦒 −😱👻 | 💻 |
+| ornith-1-5-9b-q4km | default | 2026-10-22 | [2026-10-22_default.html](ornith-1-5-9b-q4km/2026-10-22_default.html) | **+1** | +🦵🦒🌅 −😱👻 | 💻 |
 
 **Giraffe Points (GP)** = bonuses − penalties. Bonuses: 🦵 four legs · 🚶 actually walks · 🦒 giraffe-shaped · 🌅 real savannah. Penalties: 😱 nightmare fuel · 👻 ghost giraffe · 🚪 wanders off.
 
@@ -38,9 +39,12 @@ for the original idea of testing models on 3D creation.
 | muse-glimmer-30b-nvfp4 | `muse-glimmer:30b-mlx` | `high` (unverified) |
 | gemma4-12b-q4km | `gemma4:12b` | `true` (unverified) |
 | qwen3-8-27b-nvfp4 | `qwen3.8:27b-mlx` | `medium` (unverified) |
+| ornith-1-5-9b-q4km | `ornith-1.5:9b` | `true` (unverified) |
 
 😵‍💫 **ChatGPT detour.** The first reply wasn't obviously an HTML file. Asked "Is this an HTML file I can download?" and received a viewer-wrapped HTML file; the giraffe page was recovered from inside it.
 Originals: [chatgpt-sol-6-1 xhigh](chatgpt-sol-6-1/2026-10-22_xhigh.wrapper.html) · [chatgpt-sol-6-1 medium](chatgpt-sol-6-1/2026-10-22_medium.wrapper.html).
+
+🥚 **Incubating:** Qwen 3.5 9B (`qwen3.5:9b-mlx`) · Qwen 3.5 0.8B (`qwen3.5:0.8b`) · SmolLM2 360M (`smollm2:360m`).
 <!-- gallery:end -->
 
 ## Contributing

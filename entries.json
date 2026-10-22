@@ -152,6 +152,41 @@
         "ghost": "yes",
         "wanders": "no"
       }
+    },
+    "ornith-1-5-9b-q4km/2026-10-22_default.html": {
+      "label": "Ornith 1.5 9B",
+      "where": "local",
+      "flags": [
+        "💻"
+      ],
+      "tag": "ornith-1.5:9b",
+      "thinking_guess": "true",
+      "vibes": {
+        "legs": "yes",
+        "walks": "no",
+        "giraffe": "yes",
+        "savannah": "yes",
+        "nightmare": "yes",
+        "ghost": "yes",
+        "wanders": "no"
+      }
     }
-  }
+  },
+  "pending": [
+    {
+      "slug": "qwen3-5-9b-nvfp4",
+      "label": "Qwen 3.5 9B",
+      "tag": "qwen3.5:9b-mlx"
+    },
+    {
+      "slug": "qwen3-5-0-8b-q80",
+      "label": "Qwen 3.5 0.8B",
+      "tag": "qwen3.5:0.8b"
+    },
+    {
+      "slug": "smollm2-360m-f16",
+      "label": "SmolLM2 360M",
+      "tag": "smollm2:360m"
+    }
+  ]
 }

@@ -74,7 +74,11 @@ def load_entries():
             "wrapper": wrapper.relative_to(ROOT).as_posix() if wrapper.exists() else None,
         })
     entries.sort(key=lambda e: (e["date"], e["where"] != "hosted"), reverse=False)
-    return meta["flags"], entries
+    pending = meta.get("pending", [])
+    hatched = {e["slug"] for e in entries}
+    if dupes := [p["slug"] for p in pending if p["slug"] in hatched]:
+        raise SystemExit(f"pending entries already have giraffes; remove them from 'pending': {dupes}")
+    return meta["flags"], entries, pending
 
 
 # ---------- README ----------
@@ -90,14 +94,14 @@ def fmt_gp(e):
     return "?" if (score := gp(e)) is None else f"{score:+d}"
 
 
-def readme_gallery(flags, entries):
+def readme_gallery(flags, entries, pending):
     lines = ["| Model | Effort | Date | Page | GP | Vibe check | ⚑ |", "|-------|--------|------|------|----|------------|---|"]
     for e in entries:
         name = Path(e["path"]).name
         bonus = "".join(emoji for key, emoji, *_, pts in VIBES if pts > 0 and e["vibes"].get(key) == "yes")
         penalty = "".join(emoji for key, emoji, *_, pts in VIBES if pts < 0 and e["vibes"].get(key) == "yes")
-        pending = sum(k not in e["vibes"] for k in VIBE_KEYS)
-        vibes = " ".join(filter(None, [bonus and f"+{bonus}", penalty and f"−{penalty}", pending and f"❔×{pending}"]))
+        unjudged = sum(k not in e["vibes"] for k in VIBE_KEYS)
+        vibes = " ".join(filter(None, [bonus and f"+{bonus}", penalty and f"−{penalty}", unjudged and f"❔×{unjudged}"]))
         lines.append(f"| {e['slug']} | {e['effort']} | {e['date']} | [{name}]({e['path']}) | **{fmt_gp(e)}** | {vibes} | {' '.join(e['flags'])} |")
     lines += ["", "**Giraffe Points (GP)** = bonuses − penalties. "
               "Bonuses: " + " · ".join(f"{emoji} {name.lower()}" for _, emoji, name, _, pts in VIBES if pts > 0) + ". "
@@ -114,17 +118,19 @@ def readme_gallery(flags, entries):
         wrapped = [e for e in flagged if e["wrapper"]]
         if wrapped:
             lines += ["Originals: " + " · ".join(f"[{e['slug']} {e['effort']}]({e['wrapper']})" for e in wrapped) + "."]
+    if pending:
+        lines += ["", "🥚 **Incubating:** " + " · ".join(f"{p['label']} (`{p['tag']}`)" for p in pending) + "."]
     return "\n".join(lines)
 
 
-def write_readme(flags, entries):
+def write_readme(flags, entries, pending):
     readme = ROOT / "README.md"
     text = readme.read_text()
     if README_START not in text:
         raise SystemExit(f"README.md needs {README_START} / {README_END} markers around the gallery")
     head, rest = text.split(README_START, 1)
     _, tail = rest.split(README_END, 1)
-    readme.write_text(f"{head}{README_START}\n{readme_gallery(flags, entries)}\n{README_END}{tail}")
+    readme.write_text(f"{head}{README_START}\n{readme_gallery(flags, entries, pending)}\n{README_END}{tail}")
 
 
 # ---------- index.html ----------
@@ -333,7 +339,19 @@ def stars_shadow(n=70, seed=7):
     )
 
 
-def render_index(flags, entries):
+def egg_card(p):
+    return f"""
+      <article class="card egg">
+        <div class="stage nest"><span class="emoji">🥚</span><span>incubating…</span></div>
+        <div class="body">
+          <h3>{esc(p['label'])}</h3>
+          <div class="chips"><span class="chip">💻 local</span><span class="chip">🏷️ {esc(p['tag'])}</span></div>
+          <p class="tag">Not run yet. Check back for a giraffe (or a horror).</p>
+        </div>
+      </article>"""
+
+
+def render_index(flags, entries, pending):
     cards = "".join(card(e, flags) for e in entries)
     models = len({e["slug"] for e in entries})
     legend = "".join(
@@ -426,6 +444,12 @@ h2.section {{ font-size: 1.8rem; margin: 8px 0 14px; }}
 .meta {{ display: flex; justify-content: space-between; align-items: center; }}
 .gp {{ font: 700 1.05rem Fredoka, sans-serif; padding: 2px 12px; border-radius: 999px; background: var(--chip); color: var(--ink); }}
 .gp.pos {{ background: #2f9e55; color: #fff; }} .gp.neg {{ background: #c2475e; color: #fff; }}
+.egg {{ opacity: .75; border-style: dashed; }}
+.egg:hover {{ transform: none; box-shadow: none; }}
+.nest {{ flex-direction: column; gap: 4px; font: 600 1rem Fredoka, sans-serif; }}
+.nest .emoji {{ font-size: 2.8rem; display: inline-block; animation: wobble 2.4s ease-in-out infinite; }}
+@keyframes wobble {{ 0%, 70%, 100% {{ transform: rotate(0); }} 76% {{ transform: rotate(-12deg); }} 84% {{ transform: rotate(10deg); }} 92% {{ transform: rotate(-5deg); }} }}
+@media (prefers-reduced-motion: reduce) {{ .nest .emoji {{ animation: none; }} }}
 .vibes {{ display: flex; gap: 6px; align-items: center; }}
 .rowlabel {{ flex: 0 0 7.6em; box-sizing: border-box; font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
   color: var(--muted); border-right: 2px solid var(--line); padding-right: 8px; margin-right: 2px; white-space: nowrap; }}
@@ -477,7 +501,7 @@ footer {{ border-top: 1px solid var(--line); margin-top: 40px; padding: 24px 0 4
   {lessons(entries)}
 
   <h2 class="section">The herd</h2>
-  <div class="grid">{cards}
+  <div class="grid">{cards}{"".join(egg_card(p) for p in pending)}
   </div>
 
   <ul class="legend">{legend}</ul>
@@ -506,11 +530,11 @@ def main():
     ap.add_argument("--no-readme", action="store_true")
     args = ap.parse_args()
 
-    flags, entries = load_entries()
-    (ROOT / args.out).write_text(render_index(flags, entries))
-    print(f"wrote {args.out} ({len(entries)} entries)")
+    flags, entries, pending = load_entries()
+    (ROOT / args.out).write_text(render_index(flags, entries, pending))
+    print(f"wrote {args.out} ({len(entries)} entries, {len(pending)} incubating)")
     if not args.no_readme:
-        write_readme(flags, entries)
+        write_readme(flags, entries, pending)
         print("updated README.md gallery")
 
 
