@@ -3,16 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Giraffe on the loose</title>
+<title>Giraffe on the savannah</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@500;600&display=swap" rel="stylesheet">
 <style>
   :root {
     --pill-bg: rgba(255, 246, 228, 0.82);
     --pill-ink: #3a2414;
-    --pill-line: rgba(58, 36, 20, 0.2);
-    --accent: #9c5a24;
+    --pill-line: rgba(58, 36, 20, 0.18);
     --page-bg: #e9b77c;
     color-scheme: light;
     box-sizing: border-box;
@@ -23,8 +22,7 @@
     :root:not([data-theme="light"]) {
       --pill-bg: rgba(38, 24, 14, 0.78);
       --pill-ink: #f6e3c4;
-      --pill-line: rgba(246, 227, 196, 0.22);
-      --accent: #f0b066;
+      --pill-line: rgba(246, 227, 196, 0.2);
       --page-bg: #2a1a10;
       color-scheme: dark;
     }
@@ -32,8 +30,7 @@
   :root[data-theme="dark"] {
     --pill-bg: rgba(38, 24, 14, 0.78);
     --pill-ink: #f6e3c4;
-    --pill-line: rgba(246, 227, 196, 0.22);
-    --accent: #f0b066;
+    --pill-line: rgba(246, 227, 196, 0.2);
     --page-bg: #2a1a10;
     color-scheme: dark;
   }
@@ -42,91 +39,51 @@
     background: var(--page-bg);
     overflow: hidden;
     font-family: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
-    -webkit-user-select: none; user-select: none;
   }
   canvas { position: fixed; inset: 0; display: block; touch-action: none; cursor: grab; }
   canvas:active { cursor: grabbing; }
-  .panel {
+  .hud {
     position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 0;
+    margin-bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 8px 8px 8px 18px;
     background: var(--pill-bg);
     color: var(--pill-ink);
     border: 1px solid var(--pill-line);
+    border-radius: 999px;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-  }
-  .stats {
-    top: calc(16px + env(safe-area-inset-top, 0px));
-    left: 16px;
-    padding: 10px 16px;
-    border-radius: 14px;
-    min-width: 150px;
-  }
-  #state { font-weight: 700; font-size: 20px; letter-spacing: -0.01em; }
-  #dist { font-size: 14px; opacity: 0.8; margin-top: 2px; font-variant-numeric: tabular-nums; }
-  .keyhint {
-    left: 50%;
-    transform: translateX(-50%);
-    bottom: calc(18px + env(safe-area-inset-bottom, 0px));
-    padding: 9px 18px;
-    border-radius: 999px;
     font-size: 14px;
     white-space: nowrap;
   }
-  kbd {
-    font: inherit; font-weight: 600;
+  .hud button {
+    font: inherit;
+    font-weight: 600;
+    color: var(--pill-ink);
+    background: transparent;
     border: 1px solid var(--pill-line);
-    border-bottom-width: 2px;
-    border-radius: 6px;
-    padding: 0 6px;
+    border-radius: 999px;
+    padding: 6px 14px;
+    cursor: pointer;
   }
-  .touch-only { display: none; }
-  @media (pointer: coarse) {
-    .touch-only { display: block; }
-    .key-only { display: none; }
-  }
-  .joy {
-    left: calc(24px + env(safe-area-inset-left, 0px));
-    bottom: calc(28px + env(safe-area-inset-bottom, 0px));
-    width: 128px; height: 128px;
-    border-radius: 50%;
-    touch-action: none;
-  }
-  .knob {
-    position: absolute; left: 50%; top: 50%;
-    width: 52px; height: 52px; margin: -26px 0 0 -26px;
-    border-radius: 50%;
-    background: var(--accent);
-    opacity: 0.85;
-  }
-  .run {
-    right: calc(24px + env(safe-area-inset-right, 0px));
-    bottom: calc(52px + env(safe-area-inset-bottom, 0px));
-    width: 92px; height: 92px;
-    border-radius: 50%;
-    font: inherit; font-weight: 700; font-size: 16px;
-    touch-action: none;
-  }
-  .run[aria-pressed="true"] { background: var(--accent); color: var(--page-bg); }
-  .run:focus-visible { outline: 2px solid var(--pill-ink); outline-offset: 3px; }
+  .hud button:focus-visible { outline: 2px solid var(--pill-ink); outline-offset: 2px; }
+  @media (max-width: 420px) { .hint { display: none; } }
 </style>
 </head>
 <body>
-<div class="panel stats" aria-live="polite">
-  <div id="state">Standing tall</div>
-  <div id="dist">0 m roamed</div>
+<div class="hud">
+  <span class="hint">Drag to look around, scroll to zoom</span>
+  <button id="toggle" type="button">Pause</button>
 </div>
-<div class="panel keyhint key-only">
-  <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> or arrows to move, hold <kbd>Shift</kbd> to gallop, drag to look around
-</div>
-<div class="panel joy touch-only" id="joy"><div class="knob" id="knob"></div></div>
-<button class="panel run touch-only" id="run" type="button" aria-pressed="false">Gallop</button>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 (() => {
-  const lerp = (a, b, t) => a + (b - a) * t;
-  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
-
   // ---------- Renderer, scene, camera ----------
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -138,19 +95,20 @@
   const scene = new THREE.Scene();
   const HORIZON = 0xecb87c;
   scene.fog = new THREE.Fog(HORIZON, 60, 330);
-  const camera = new THREE.PerspectiveCamera(48, window.innerWidth / window.innerHeight, 0.1, 1200);
 
-  // ---------- Lighting ----------
+  const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1200);
+
+  // ---------- Lighting (late-afternoon sun) ----------
   const sunDir = new THREE.Vector3(-0.65, 0.32, -0.69).normalize();
   scene.add(new THREE.HemisphereLight(0xffe2b8, 0x7a5a32, 0.75));
   const sun = new THREE.DirectionalLight(0xffd59a, 1.05);
   sun.castShadow = true;
   sun.shadow.mapSize.set(2048, 2048);
-  Object.assign(sun.shadow.camera, { left: -18, right: 18, top: 18, bottom: -18, near: 1, far: 90 });
+  Object.assign(sun.shadow.camera, { left: -16, right: 16, top: 16, bottom: -16, near: 1, far: 90 });
   sun.shadow.bias = -0.0015;
   scene.add(sun, sun.target);
 
-  // ---------- Sky + sun ----------
+  // ---------- Sky dome + sun disc ----------
   {
     const geo = new THREE.SphereGeometry(600, 32, 16);
     const cols = [];
@@ -194,16 +152,16 @@
     scene.add(ground);
   }
 
-  // ---------- Grass ----------
+  // ---------- Grass tufts (instanced) ----------
   {
-    const COUNT = 9000;
+    const COUNT = 7000;
     const blade = new THREE.ConeGeometry(0.06, 0.7, 3);
     blade.translate(0, 0.35, 0);
     const mesh = new THREE.InstancedMesh(blade, new THREE.MeshLambertMaterial(), COUNT);
     const m = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), s = new THREE.Vector3(), p = new THREE.Vector3();
     const c = new THREE.Color();
     for (let i = 0; i < COUNT; i++) {
-      const r = Math.sqrt(Math.random()) * 170, a = Math.random() * Math.PI * 2;
+      const r = 4 + Math.pow(Math.random(), 0.7) * 150, a = Math.random() * Math.PI * 2;
       const x = Math.cos(a) * r, z = Math.sin(a) * r;
       p.set(x, heightAt(x, z), z);
       e.set((Math.random() - 0.5) * 0.5, Math.random() * Math.PI, (Math.random() - 0.5) * 0.5);
@@ -218,10 +176,9 @@
     scene.add(mesh);
   }
 
-  // ---------- Acacia trees (also obstacles) ----------
+  // ---------- Acacia trees ----------
   const barkMat = new THREE.MeshLambertMaterial({ color: 0x4a3322 });
   const leafMat = new THREE.MeshLambertMaterial({ color: 0x5b6a2e, flatShading: true });
-  const obstacles = [];
   function acacia(x, z, s) {
     const g = new THREE.Group();
     const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.32, 4.2, 7), barkMat);
@@ -238,6 +195,7 @@
       const leaf = new THREE.Mesh(canopyGeo, leafMat);
       leaf.position.set(cx, 5.8 + h * 0.3, cz);
       leaf.scale.set(w, h, w * 0.9);
+      leaf.castShadow = true;
       g.add(leaf);
     });
     g.traverse(o => { if (o.isMesh) o.castShadow = true; });
@@ -245,11 +203,9 @@
     g.scale.setScalar(s);
     g.rotation.y = Math.random() * Math.PI * 2;
     scene.add(g);
-    obstacles.push([x, z, 0.45 * s + 1.1]);
   }
-  [[14, 22, 1.3], [-48, 14, 1.1], [52, -30, 1.2], [-20, -62, 1.4], [70, 40, 1.0], [-80, -20, 1.2],
-   [18, 75, 1.1], [-60, 70, 1.3], [110, -5, 1.4], [-120, 60, 1.2], [40, -110, 1.1], [-15, 120, 1.0],
-   [-30, -25, 1.2], [85, -75, 1.3], [-95, -90, 1.1], [130, 70, 1.2], [-140, -10, 1.3], [5, -140, 1.2]]
+  [[6, -8, 1.3], [-48, 14, 1.1], [52, -30, 1.2], [-20, -62, 1.4], [70, 40, 1.0], [-80, -20, 1.2],
+   [18, 75, 1.1], [-60, 70, 1.3], [110, -5, 1.4], [-120, 60, 1.2], [40, -110, 1.1], [-15, 120, 1.0]]
     .forEach(([x, z, s]) => acacia(x, z, s));
 
   // ---------- Distant hills ----------
@@ -264,7 +220,7 @@
     }
   }
 
-  // ---------- Coat texture ----------
+  // ---------- Giraffe coat texture (reticulated patches) ----------
   function makeCoat() {
     const N = 256, cv = document.createElement('canvas');
     cv.width = cv.height = N;
@@ -299,16 +255,18 @@
   const darkMat = new THREE.MeshLambertMaterial({ color: 0x2e1c10 });
   const maneMat = new THREE.MeshLambertMaterial({ color: 0x6b3e1c });
 
-  // ---------- Giraffe ----------
+  // ---------- Build the giraffe ----------
   const giraffe = new THREE.Group();
-  const body = new THREE.Group();
+  const body = new THREE.Group();          // bobs up and down; legs hang from it
   body.position.y = 2.72;
   giraffe.add(body);
+
   const torso = new THREE.Mesh(new THREE.SphereGeometry(1, 28, 18), bodyMat);
   torso.scale.set(0.62, 0.72, 1.28);
-  torso.rotation.x = -0.16;
+  torso.rotation.x = -0.16;               // back slopes down toward the tail
   body.add(torso);
 
+  // Neck
   const neckPivot = new THREE.Group();
   neckPivot.position.set(0, 0.38, 0.95);
   body.add(neckPivot);
@@ -320,6 +278,7 @@
   mane.rotation.x = 0.06;
   neckPivot.add(mane);
 
+  // Head
   const head = new THREE.Group();
   head.position.y = 2.68;
   neckPivot.add(head);
@@ -352,6 +311,7 @@
     head.add(eye);
   });
 
+  // Tail
   const tailPivot = new THREE.Group();
   tailPivot.position.set(0, 0.12, -1.22);
   body.add(tailPivot);
@@ -363,7 +323,8 @@
   tuft.position.y = -1.18;
   tailPivot.add(tuft);
 
-  function makeLeg(x, y, z, upper, lower, walkOff, runOff) {
+  // Legs: hip pivot -> upper leg -> knee pivot -> lower leg -> hoof
+  function makeLeg(x, y, z, upper, lower) {
     const hip = new THREE.Group();
     hip.position.set(x, y, z);
     const u = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.1, upper, 10), legMat);
@@ -372,7 +333,8 @@
     const knee = new THREE.Group();
     knee.position.y = -upper;
     hip.add(knee);
-    knee.add(new THREE.Mesh(new THREE.SphereGeometry(0.1, 10, 8), legMat));
+    const joint = new THREE.Mesh(new THREE.SphereGeometry(0.1, 10, 8), legMat);
+    knee.add(joint);
     const l = new THREE.Mesh(new THREE.CylinderGeometry(0.085, 0.07, lower - 0.12, 10), creamMat);
     l.position.y = -(lower - 0.12) / 2;
     knee.add(l);
@@ -380,203 +342,109 @@
     hoof.position.y = -lower + 0.07;
     knee.add(hoof);
     body.add(hip);
-    return { hip, knee, lower, walkOff, runOff, front: z > 0 };
+    return { hip, knee };
   }
-  // Walk = pace (same-side legs together). Gallop = fronts together-ish, hinds together-ish.
-  const legs = [
-    makeLeg( 0.3,  0.05,  0.85, 1.42, 1.35, 0,       0),
-    makeLeg(-0.3,  0.05,  0.85, 1.42, 1.35, Math.PI, 0.35),
-    makeLeg( 0.3, -0.18, -0.88, 1.27, 1.27, 0,       Math.PI),
-    makeLeg(-0.3, -0.18, -0.88, 1.27, 1.27, Math.PI, Math.PI + 0.35),
-  ];
+  // y is relative to body center (2.72): front hips sit higher, giving the sloping back
+  const legs = {
+    fl: makeLeg( 0.3,  0.05,  0.85, 1.42, 1.35),
+    fr: makeLeg(-0.3,  0.05,  0.85, 1.42, 1.35),
+    hl: makeLeg( 0.3, -0.18, -0.88, 1.27, 1.27),
+    hr: makeLeg(-0.3, -0.18, -0.88, 1.27, 1.27),
+  };
+
   giraffe.traverse(o => { if (o.isMesh) o.castShadow = true; });
   scene.add(giraffe);
 
-  // ---------- Dust puffs ----------
-  const dustGeo = new THREE.SphereGeometry(0.25, 8, 6);
-  const dust = [];
-  for (let i = 0; i < 60; i++) {
-    const m = new THREE.Mesh(dustGeo, new THREE.MeshLambertMaterial({ color: 0xd9b27a, transparent: true, opacity: 0, depthWrite: false }));
-    m.visible = false; m.userData.life = 0;
-    scene.add(m); dust.push(m);
+  // ---------- Motion ----------
+  const PATH_R = 30, FREQ = 0.62, SWING = 0.36;
+  const strideLen = 2 * 2.6 * Math.sin(SWING) * 2;   // ground covered per gait cycle
+  const SPEED = strideLen * FREQ;
+  let travelled = 0, phaseTime = 0;
+
+  function pose(p) {
+    // Giraffes pace: both legs on one side move together
+    const sides = [['fl', 'hl', p], ['fr', 'hr', p + Math.PI]];
+    sides.forEach(([front, hind, ph]) => {
+      const swing = -Math.sin(ph) * SWING;
+      const lift = Math.max(0, Math.cos(ph));
+      legs[front].hip.rotation.x = swing;
+      legs[front].knee.rotation.x = lift * 0.75;
+      legs[hind].hip.rotation.x = swing * 0.9;
+      legs[hind].knee.rotation.x = lift * 0.6;
+    });
+    body.position.y = 2.72 + 0.05 * Math.cos(2 * p);
+    body.rotation.z = 0.035 * Math.sin(p);           // side-to-side roll of the pace
+    neckPivot.rotation.x = 0.42 + 0.07 * Math.sin(p * 2 + 0.6);
+    head.rotation.x = 0.2 - neckPivot.rotation.x - 0.05 * Math.sin(p * 2 + 0.6);
+    tailPivot.rotation.x = 0.25 + 0.12 * Math.sin(p * 1.3);
+    tailPivot.rotation.z = 0.15 * Math.sin(p * 0.9);
   }
-  let dustIdx = 0, dustTimer = 0;
-  const tmpV = new THREE.Vector3();
-  function spawnDust() {
-    const leg = legs[(Math.random() * 4) | 0];
-    tmpV.set(0, -leg.lower + 0.05, 0);
-    leg.knee.localToWorld(tmpV);
-    const m = dust[dustIdx++ % dust.length];
-    m.position.set(tmpV.x + (Math.random() - 0.5) * 0.4, heightAt(tmpV.x, tmpV.z) + 0.15, tmpV.z + (Math.random() - 0.5) * 0.4);
-    m.userData.life = 1; m.visible = true;
+
+  function placeGiraffe() {
+    const a = travelled / PATH_R;
+    const x = Math.cos(a) * PATH_R, z = Math.sin(a) * PATH_R;
+    giraffe.position.set(x, heightAt(x, z), z);
+    giraffe.rotation.y = Math.atan2(-Math.sin(a), Math.cos(a));
   }
 
-  // ---------- Input ----------
-  const keys = {};
-  const blockKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'];
-  addEventListener('keydown', e => { keys[e.code] = true; if (blockKeys.includes(e.code)) e.preventDefault(); });
-  addEventListener('keyup', e => { keys[e.code] = false; });
-  addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
-
-  const joyEl = document.getElementById('joy'), knob = document.getElementById('knob');
-  const joy = { active: false, x: 0, y: 0 };
-  function joyMove(e) {
-    const r = joyEl.getBoundingClientRect();
-    let dx = (e.clientX - (r.left + r.width / 2)) / (r.width / 2);
-    let dy = (e.clientY - (r.top + r.height / 2)) / (r.height / 2);
-    const len = Math.hypot(dx, dy);
-    if (len > 1) { dx /= len; dy /= len; }
-    joy.x = dx; joy.y = dy;
-    knob.style.transform = `translate(${dx * 38}px, ${dy * 38}px)`;
-  }
-  joyEl.addEventListener('pointerdown', e => { joy.active = true; joyEl.setPointerCapture(e.pointerId); joyMove(e); });
-  joyEl.addEventListener('pointermove', e => { if (joy.active) joyMove(e); });
-  const joyEnd = () => { joy.active = false; joy.x = joy.y = 0; knob.style.transform = ''; };
-  joyEl.addEventListener('pointerup', joyEnd);
-  joyEl.addEventListener('pointercancel', joyEnd);
-
-  const runBtn = document.getElementById('run');
-  let runToggle = false;
-  runBtn.addEventListener('click', () => { runToggle = !runToggle; runBtn.setAttribute('aria-pressed', runToggle); });
-
-  // Camera orbit by dragging the scene
-  let yaw = Math.PI, pitch = 0.2, dist = 16, lastDrag = -1e9;
+  // ---------- Camera orbit (drag + wheel) ----------
+  let yaw = Math.PI / 2 + 0.35, pitch = 0.16, dist = 14;
+  const camTarget = new THREE.Vector3();
   let dragging = false, lastX = 0, lastY = 0;
   const cv = renderer.domElement;
   cv.addEventListener('pointerdown', e => { dragging = true; lastX = e.clientX; lastY = e.clientY; cv.setPointerCapture(e.pointerId); });
   cv.addEventListener('pointermove', e => {
     if (!dragging) return;
     yaw -= (e.clientX - lastX) * 0.006;
-    pitch = clamp(pitch + (e.clientY - lastY) * 0.004, 0.03, 1.2);
-    lastX = e.clientX; lastY = e.clientY; lastDrag = performance.now();
+    pitch = Math.min(1.2, Math.max(0.03, pitch + (e.clientY - lastY) * 0.004));
+    lastX = e.clientX; lastY = e.clientY;
   });
-  const dragEnd = () => { dragging = false; };
-  cv.addEventListener('pointerup', dragEnd);
-  cv.addEventListener('pointercancel', dragEnd);
-  cv.addEventListener('wheel', e => { e.preventDefault(); dist = clamp(dist * (1 + e.deltaY * 0.001), 7, 45); }, { passive: false });
-
-  // ---------- Game state ----------
-  const WALK = 2.8, GALLOP = 10, BACK = 1.3, WORLD_R = 150;
-  let heading = 0, speed = 0, turnVel = 0, phase = 0, idleT = 0, roamed = 0;
-  giraffe.position.set(0, heightAt(0, 0), 0);
-
-  const stateEl = document.getElementById('state'), distEl = document.getElementById('dist');
-  let lastState = '', lastDist = -1;
-
-  function pose(p, amp, run, t) {
-    const swing = lerp(0.36, 0.62, run) * amp;
-    const lift = lerp(0.75, 1.15, run) * amp;
-    legs.forEach(leg => {
-      const ph = p + lerp(leg.walkOff, leg.runOff, run);
-      leg.hip.rotation.x = -Math.sin(ph) * swing * (leg.front ? 1 : 0.9);
-      leg.knee.rotation.x = Math.max(0, Math.cos(ph)) * lift * (leg.front ? 1 : 0.8);
-    });
-    body.position.y = 2.72 + amp * lerp(0.05 * Math.cos(2 * p), 0.16 * Math.cos(p), run);
-    body.rotation.x = 0.07 * Math.sin(p) * run * amp;
-    body.rotation.z = 0.035 * Math.sin(p) * amp * (1 - run) - turnVel * speed * 0.006;
-    const neckBase = lerp(0.42, 0.78, run);
-    const neckSwing = amp * lerp(0.07 * Math.sin(2 * p + 0.6), 0.2 * Math.sin(p + 1.2), run);
-    const idleSway = (1 - amp) * 0.04 * Math.sin(t * 0.7);
-    neckPivot.rotation.x = neckBase + neckSwing + idleSway;
-    neckPivot.rotation.y = (1 - amp) * 0.25 * Math.sin(t * 0.3) + turnVel * 0.12;
-    head.rotation.x = 0.2 - neckPivot.rotation.x;
-    tailPivot.rotation.x = lerp(0.25, 1.25, run) + 0.12 * Math.sin(t * 1.3 + p);
-    tailPivot.rotation.z = 0.15 * Math.sin(t * 0.9);
-  }
+  const end = () => { dragging = false; };
+  cv.addEventListener('pointerup', end);
+  cv.addEventListener('pointercancel', end);
+  cv.addEventListener('wheel', e => { e.preventDefault(); dist = Math.min(45, Math.max(6, dist * (1 + e.deltaY * 0.001))); }, { passive: false });
 
   function updateCamera(snap) {
-    const h = heading + yaw;
-    const target = new THREE.Vector3(giraffe.position.x, giraffe.position.y + 3.4, giraffe.position.z);
+    const h = giraffe.rotation.y + yaw;
+    camTarget.set(giraffe.position.x, giraffe.position.y + 3.2, giraffe.position.z);
     const want = new THREE.Vector3(
-      target.x + Math.sin(h) * Math.cos(pitch) * dist,
-      target.y + Math.sin(pitch) * dist,
-      target.z + Math.cos(h) * Math.cos(pitch) * dist
+      camTarget.x + Math.sin(h) * Math.cos(pitch) * dist,
+      camTarget.y + Math.sin(pitch) * dist,
+      camTarget.z + Math.cos(h) * Math.cos(pitch) * dist
     );
     const floor = heightAt(want.x, want.z) + 0.6;
     if (want.y < floor) want.y = floor;
-    if (snap) camera.position.copy(want); else camera.position.lerp(want, 0.1);
-    camera.lookAt(target);
+    if (snap) camera.position.copy(want); else camera.position.lerp(want, 0.08);
+    camera.lookAt(camTarget);
   }
+
+  // ---------- Play / pause ----------
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let playing = !reduceMotion;
+  const btn = document.getElementById('toggle');
+  const syncBtn = () => { btn.textContent = playing ? 'Pause' : 'Play'; };
+  syncBtn();
+  btn.addEventListener('click', () => { playing = !playing; syncBtn(); });
 
   // ---------- Loop ----------
   const clock = new THREE.Clock();
+  placeGiraffe();
+  pose(0);
   updateCamera(true);
 
   function frame() {
     const dt = Math.min(clock.getDelta(), 0.05);
-    idleT += dt;
-
-    let fwd = (keys.KeyW || keys.ArrowUp ? 1 : 0) - (keys.KeyS || keys.ArrowDown ? 1 : 0);
-    let turn = (keys.KeyA || keys.ArrowLeft ? 1 : 0) - (keys.KeyD || keys.ArrowRight ? 1 : 0);
-    let wantRun = keys.ShiftLeft || keys.ShiftRight || runToggle;
-    if (joy.active) {
-      fwd = clamp(-joy.y * 1.4, -1, 1);
-      turn = clamp(-joy.x * 1.3, -1, 1);
-    }
-
-    const target = fwd > 0 ? fwd * (wantRun ? GALLOP : WALK) : fwd * BACK;
-    speed += (target - speed) * Math.min(1, dt * (Math.abs(target) > Math.abs(speed) ? 1.6 : 2.6));
-    const run = clamp((Math.abs(speed) - 3) / 5, 0, 1);
-    const turnRate = lerp(1.7, 1.0, run);
-    turnVel += (turn * turnRate - turnVel) * Math.min(1, dt * 6);
-    heading += turnVel * dt;
-
-    // Move, then stay out of trees and inside the plains
-    const pos = giraffe.position;
-    pos.x += Math.sin(heading) * speed * dt;
-    pos.z += Math.cos(heading) * speed * dt;
-    for (const [ox, oz, r] of obstacles) {
-      const dx = pos.x - ox, dz = pos.z - oz, d = Math.hypot(dx, dz);
-      if (d < r && d > 1e-4) { pos.x = ox + dx / d * r; pos.z = oz + dz / d * r; }
-    }
-    const fromCenter = Math.hypot(pos.x, pos.z);
-    if (fromCenter > WORLD_R) { pos.x *= WORLD_R / fromCenter; pos.z *= WORLD_R / fromCenter; }
-    pos.y = heightAt(pos.x, pos.z);
-    giraffe.rotation.y = heading;
-    roamed += Math.abs(speed) * dt;
-
-    // Gait
-    const amp = clamp(Math.max(Math.abs(speed) / 1.5, Math.abs(turnVel) * 0.6), 0, 1);
-    const stride = lerp(4.0, 8.0, run);
-    phase += Math.PI * 2 * (Math.abs(speed) / stride) * Math.sign(speed || 1) * dt + Math.abs(turnVel) * 1.2 * dt;
-    pose(phase, amp, run, idleT);
-    giraffe.updateMatrixWorld(true);
-
-    // Dust when galloping
-    if (run > 0.4) {
-      dustTimer += dt;
-      while (dustTimer > 0.035) { dustTimer -= 0.035; spawnDust(); }
-    }
-    for (const m of dust) {
-      if (!m.visible) continue;
-      m.userData.life -= dt / 1.1;
-      if (m.userData.life <= 0) { m.visible = false; continue; }
-      const l = m.userData.life;
-      m.scale.setScalar(1 + (1 - l) * 3.5);
-      m.position.y += 0.5 * dt;
-      m.material.opacity = l * 0.4;
-    }
-
-    // Camera drifts back behind the giraffe while moving
-    if (!dragging && performance.now() - lastDrag > 1500 && Math.abs(speed) > 0.5) {
-      const TAU = Math.PI * 2;
-      const diff = ((Math.PI - yaw) % TAU + TAU + Math.PI) % TAU - Math.PI;
-      yaw += diff * Math.min(1, dt * 1.2);
+    if (playing) {
+      travelled += SPEED * dt;
+      phaseTime += dt;
+      placeGiraffe();
+      pose(phaseTime * FREQ * Math.PI * 2);
     }
     updateCamera(false);
-    sun.position.copy(pos).addScaledVector(sunDir, 45);
-    sun.target.position.copy(pos);
+    sun.position.copy(giraffe.position).addScaledVector(sunDir, 45);
+    sun.target.position.copy(giraffe.position);
     sunDisc.lookAt(camera.position);
     sunGlow.lookAt(camera.position);
-
-    // HUD
-    const label = Math.abs(speed) < 0.2 && Math.abs(turnVel) < 0.1 ? 'Standing tall'
-                : speed < 0 ? 'Backing up'
-                : run > 0.6 ? 'Galloping free' : 'Strolling';
-    if (label !== lastState) { stateEl.textContent = label; lastState = label; }
-    const meters = Math.floor(roamed);
-    if (meters !== lastDist) { distEl.textContent = `${meters.toLocaleString()} m roamed`; lastDist = meters; }
-
     renderer.render(scene, camera);
     requestAnimationFrame(frame);
   }
