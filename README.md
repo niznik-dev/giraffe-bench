@@ -15,20 +15,22 @@ for the original idea of testing models on 3D creation.
 
 ## Gallery
 
-| Model | Effort | Date | Page | ⚑ |
-|-------|--------|------|------|---|
-| claude-opus-5-5 | medium | 2026-10-22 | [2026-10-22_medium.html](claude-opus-5-5/2026-10-22_medium.html) | |
-| claude-sonnet-5-5 | medium | 2026-10-22 | [2026-10-22_medium.html](claude-sonnet-5-5/2026-10-22_medium.html) | |
-| claude-haiku-5-5 | medium | 2026-10-22 | [2026-10-22_medium.html](claude-haiku-5-5/2026-10-22_medium.html) | |
-| chatgpt-sol-6-1 | xhigh | 2026-10-22 | [2026-10-22_xhigh.html](chatgpt-sol-6-1/2026-10-22_xhigh.html) | 😵‍💫 |
-| chatgpt-sol-6-1 | medium | 2026-10-22 | [2026-10-22_medium.html](chatgpt-sol-6-1/2026-10-22_medium.html) | 😵‍💫 |
-| nemotron-3-5-lightning-30b-nvfp4 | default | 2026-10-22 | [2026-10-22_default.html](nemotron-3-5-lightning-30b-nvfp4/2026-10-22_default.html) | 💻 |
-| muse-glimmer-30b-nvfp4 | default | 2026-10-22 | [2026-10-22_default.html](muse-glimmer-30b-nvfp4/2026-10-22_default.html) | 💻 |
-| gemma4-12b-q4km | default | 2026-10-22 | [2026-10-22_default.html](gemma4-12b-q4km/2026-10-22_default.html) | 💻 |
-| qwen3-8-27b-nvfp4 | default | 2026-10-22 | [2026-10-22_default.html](qwen3-8-27b-nvfp4/2026-10-22_default.html) | 💻 |
+<!-- gallery:start -->
+| Model | Effort | Date | Page | GP | Vibe check | ⚑ |
+|-------|--------|------|------|----|------------|---|
+| claude-opus-5-5 | medium | 2026-10-22 | [2026-10-22_medium.html](claude-opus-5-5/2026-10-22_medium.html) | **+4** | +🦵🚶🦒🌅 |  |
+| claude-sonnet-5-5 | medium | 2026-10-22 | [2026-10-22_medium.html](claude-sonnet-5-5/2026-10-22_medium.html) | **+4** | +🦵🚶🦒🌅 |  |
+| claude-haiku-5-5 | medium | 2026-10-22 | [2026-10-22_medium.html](claude-haiku-5-5/2026-10-22_medium.html) | **+3** | +🦵🚶🌅 |  |
+| chatgpt-sol-6-1 | xhigh | 2026-10-22 | [2026-10-22_xhigh.html](chatgpt-sol-6-1/2026-10-22_xhigh.html) | **+4** | +🦵🚶🦒🌅 | 😵‍💫 |
+| chatgpt-sol-6-1 | medium | 2026-10-22 | [2026-10-22_medium.html](chatgpt-sol-6-1/2026-10-22_medium.html) | **+3** | +🦵🚶🦒🌅 −👻 | 😵‍💫 |
+| nemotron-3-5-lightning-30b-nvfp4 | default | 2026-10-22 | [2026-10-22_default.html](nemotron-3-5-lightning-30b-nvfp4/2026-10-22_default.html) | **-2** | −😱👻 | 💻 |
+| muse-glimmer-30b-nvfp4 | default | 2026-10-22 | [2026-10-22_default.html](muse-glimmer-30b-nvfp4/2026-10-22_default.html) | **-1** | +🦵🚶 −😱👻🚪 | 💻 |
+| gemma4-12b-q4km | default | 2026-10-22 | [2026-10-22_default.html](gemma4-12b-q4km/2026-10-22_default.html) | **-1** | +🦵 −😱🚪 | 💻 |
+| qwen3-8-27b-nvfp4 | default | 2026-10-22 | [2026-10-22_default.html](qwen3-8-27b-nvfp4/2026-10-22_default.html) | **+0** | +🦵🦒 −😱👻 | 💻 |
 
-💻 **Local run.** MacBook Pro (Apple M2 Pro, 32 GB) through Cherry Studio → Ollama 0.40.4. Effort is
-Cherry's thinking setting; the level Ollama actually ran is a best guess from each model's default.
+**Giraffe Points (GP)** = bonuses − penalties. Bonuses: 🦵 four legs · 🚶 actually walks · 🦒 giraffe-shaped · 🌅 real savannah. Penalties: 😱 nightmare fuel · 👻 ghost giraffe · 🚪 wanders off.
+
+💻 **Local run.** MacBook Pro (Apple M2 Pro, 32 GB) through Cherry Studio → Ollama 0.40.4. Effort is Cherry's thinking setting; the level Ollama actually ran is a best guess from each model's default.
 
 | Model | Ollama tag | Likely thinking level |
 |-------|------------|-----------------------|
@@ -37,12 +39,18 @@ Cherry's thinking setting; the level Ollama actually ran is a best guess from ea
 | gemma4-12b-q4km | `gemma4:12b` | `true` (unverified) |
 | qwen3-8-27b-nvfp4 | `qwen3.8:27b-mlx` | `medium` (unverified) |
 
-😵‍💫 **ChatGPT detour.** The first reply wasn't obviously an HTML file. Asked *"Is this an HTML file I
-can download?"* and received a viewer-wrapped HTML file; the giraffe page was recovered from inside it.
-Originals: [xhigh](chatgpt-sol-6-1/2026-10-22_xhigh.wrapper.html) ·
-[medium](chatgpt-sol-6-1/2026-10-22_medium.wrapper.html).
+😵‍💫 **ChatGPT detour.** The first reply wasn't obviously an HTML file. Asked "Is this an HTML file I can download?" and received a viewer-wrapped HTML file; the giraffe page was recovered from inside it.
+Originals: [chatgpt-sol-6-1 xhigh](chatgpt-sol-6-1/2026-10-22_xhigh.wrapper.html) · [chatgpt-sol-6-1 medium](chatgpt-sol-6-1/2026-10-22_medium.wrapper.html).
+<!-- gallery:end -->
 
 ## Contributing
+
+To add a giraffe:
+
+1. Save the page as `<model-slug>/<YYYY-MM-DD>[_<effort>].html` (rules below).
+2. Add an entry to `entries.json`: a display label, `hosted` or `local`, and any ⚑ flags.
+3. Run `python build.py` to regenerate `index.html` and the gallery table in this README.
+   Don't edit either by hand; the build refuses to run if a folder and `entries.json` disagree.
 
 Every entry uses the exact prompt above. If the wording ever changes, record the new version here
 and note which entries used it. Pages should stay single-file: inline JS/CSS, with three.js loaded

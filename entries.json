@@ -1,0 +1,157 @@
+{
+  "flags": {
+    "💻": {
+      "title": "Local run",
+      "text": "MacBook Pro (Apple M2 Pro, 32 GB) through Cherry Studio → Ollama 0.40.4. Effort is Cherry's thinking setting; the level Ollama actually ran is a best guess from each model's default."
+    },
+    "😵‍💫": {
+      "title": "ChatGPT detour",
+      "text": "The first reply wasn't obviously an HTML file. Asked \"Is this an HTML file I can download?\" and received a viewer-wrapped HTML file; the giraffe page was recovered from inside it."
+    }
+  },
+  "entries": {
+    "claude-opus-5-5/2026-10-22_medium.html": {
+      "label": "Claude Opus 5.5",
+      "where": "hosted",
+      "vibes": {
+        "legs": "yes",
+        "walks": "yes",
+        "giraffe": "yes",
+        "nightmare": "no",
+        "savannah": "yes",
+        "ghost": "no",
+        "wanders": "no"
+      }
+    },
+    "claude-sonnet-5-5/2026-10-22_medium.html": {
+      "label": "Claude Sonnet 5.5",
+      "where": "hosted",
+      "vibes": {
+        "legs": "yes",
+        "walks": "yes",
+        "giraffe": "yes",
+        "nightmare": "no",
+        "savannah": "yes",
+        "ghost": "no",
+        "wanders": "no"
+      }
+    },
+    "claude-haiku-5-5/2026-10-22_medium.html": {
+      "label": "Claude Haiku 5.5",
+      "where": "hosted",
+      "vibes": {
+        "legs": "yes",
+        "walks": "yes",
+        "giraffe": "no",
+        "nightmare": "no",
+        "savannah": "yes",
+        "ghost": "no",
+        "wanders": "no"
+      }
+    },
+    "chatgpt-sol-6-1/2026-10-22_xhigh.html": {
+      "label": "ChatGPT Sol 6.1",
+      "where": "hosted",
+      "flags": [
+        "😵‍💫"
+      ],
+      "vibes": {
+        "legs": "yes",
+        "walks": "yes",
+        "giraffe": "yes",
+        "nightmare": "no",
+        "savannah": "yes",
+        "ghost": "no",
+        "wanders": "no"
+      }
+    },
+    "chatgpt-sol-6-1/2026-10-22_medium.html": {
+      "label": "ChatGPT Sol 6.1",
+      "where": "hosted",
+      "flags": [
+        "😵‍💫"
+      ],
+      "vibes": {
+        "legs": "yes",
+        "walks": "yes",
+        "giraffe": "yes",
+        "nightmare": "no",
+        "savannah": "yes",
+        "ghost": "yes",
+        "wanders": "no"
+      }
+    },
+    "nemotron-3-5-lightning-30b-nvfp4/2026-10-22_default.html": {
+      "label": "Nemotron 3.5 Lightning 30B",
+      "where": "local",
+      "flags": [
+        "💻"
+      ],
+      "tag": "nemotron-3.5-lightning:30b-mlx",
+      "thinking_guess": "true",
+      "vibes": {
+        "legs": "no",
+        "walks": "no",
+        "giraffe": "no",
+        "nightmare": "yes",
+        "savannah": "no",
+        "ghost": "yes",
+        "wanders": "no"
+      }
+    },
+    "muse-glimmer-30b-nvfp4/2026-10-22_default.html": {
+      "label": "Muse Glimmer 30B",
+      "where": "local",
+      "flags": [
+        "💻"
+      ],
+      "tag": "muse-glimmer:30b-mlx",
+      "thinking_guess": "high",
+      "vibes": {
+        "legs": "yes",
+        "walks": "yes",
+        "giraffe": "no",
+        "nightmare": "yes",
+        "savannah": "no",
+        "ghost": "yes",
+        "wanders": "yes"
+      }
+    },
+    "gemma4-12b-q4km/2026-10-22_default.html": {
+      "label": "Gemma 4 12B",
+      "where": "local",
+      "flags": [
+        "💻"
+      ],
+      "tag": "gemma4:12b",
+      "thinking_guess": "true",
+      "vibes": {
+        "legs": "yes",
+        "walks": "no",
+        "giraffe": "no",
+        "nightmare": "yes",
+        "savannah": "no",
+        "ghost": "no",
+        "wanders": "yes"
+      }
+    },
+    "qwen3-8-27b-nvfp4/2026-10-22_default.html": {
+      "label": "Qwen 3.8 27B",
+      "where": "local",
+      "flags": [
+        "💻"
+      ],
+      "tag": "qwen3.8:27b-mlx",
+      "thinking_guess": "medium",
+      "vibes": {
+        "legs": "yes",
+        "walks": "no",
+        "giraffe": "yes",
+        "nightmare": "yes",
+        "savannah": "no",
+        "ghost": "yes",
+        "wanders": "no"
+      }
+    }
+  }
+}

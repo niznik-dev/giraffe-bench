@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>giraffe-bench 🦒</title>
+<meta name="description" content="LLM-generated three.js giraffes walking through a savannah. Not a serious benchmark.">
+<meta property="og:title" content="giraffe-bench 🦒">
+<meta property="og:description" content="9 LLM-generated three.js giraffes, walking with varying success.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦒</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+<script>try { const t = localStorage.getItem('giraffe-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
+<style>
+:root {
+  --bg: #fdf6e9; --ink: #2b2118; --muted: #7a6650; --card: #fffdf8; --line: #ead9bd;
+  --accent: #d9822b; --accent-ink: #fff; --chip: #f6ead3; --sky1: #ffcf7a; --sky2: #f08a4b; --sky3: #c2475e;
+  --ground: #b9893f; --tree: #3b2a1d;
+}
+@media (prefers-color-scheme: dark) {
+:root:not([data-theme="light"]) { --bg: #15121a; --ink: #f1e9dc; --muted: #b3a690; --card: #211c26; --line: #3a3241;
+    --accent: #f0a04b; --accent-ink: #1b1510; --chip: #2f2833; --sky1: #0b1030; --sky2: #1f2150; --sky3: #4b3a6e;
+    --ground: #3a2c1f; --tree: #0a0808; }
+:root:not([data-theme="light"]) .sun { background:
+    radial-gradient(circle at 58% 38%, rgba(0,0,0,.10) 0 7%, transparent 8%),
+    radial-gradient(circle at 42% 62%, rgba(0,0,0,.08) 0 5%, transparent 6%),
+    radial-gradient(circle at 36% 34%, #fffef6, #e9e5d6 50%, #cbc5b0 66%, transparent 68%);
+  filter: drop-shadow(0 0 18px rgba(255,250,220,.45)); opacity: 1; }
+:root:not([data-theme="light"]) .stars { opacity: 1; }
+}
+:root[data-theme="dark"] { --bg: #15121a; --ink: #f1e9dc; --muted: #b3a690; --card: #211c26; --line: #3a3241;
+    --accent: #f0a04b; --accent-ink: #1b1510; --chip: #2f2833; --sky1: #0b1030; --sky2: #1f2150; --sky3: #4b3a6e;
+    --ground: #3a2c1f; --tree: #0a0808; }
+:root[data-theme="dark"] .sun { background:
+    radial-gradient(circle at 58% 38%, rgba(0,0,0,.10) 0 7%, transparent 8%),
+    radial-gradient(circle at 42% 62%, rgba(0,0,0,.08) 0 5%, transparent 6%),
+    radial-gradient(circle at 36% 34%, #fffef6, #e9e5d6 50%, #cbc5b0 66%, transparent 68%);
+  filter: drop-shadow(0 0 18px rgba(255,250,220,.45)); opacity: 1; }
+:root[data-theme="dark"] .stars { opacity: 1; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 Nunito, system-ui, sans-serif; }
+h1, h2, h3 { font-family: Fredoka, Nunito, sans-serif; line-height: 1.15; }
+a { color: var(--accent); }
+.wrap { max-width: 1180px; margin: 0 auto; padding: 0 16px; }
+header.hero { position: relative; overflow: hidden; color: #fff;
+  background: linear-gradient(180deg, var(--sky1), var(--sky2) 55%, var(--sky3)); padding: 56px 0 120px; }
+.hero h1 { font-size: clamp(2.4rem, 7vw, 4.2rem); margin: 0; text-shadow: 0 3px 0 rgba(0,0,0,.18); }
+.hero .tagline { font-size: 1.2rem; margin: 8px 0 20px; max-width: 40ch; }
+.hero blockquote { margin: 0; padding: 14px 18px; background: rgba(0,0,0,.22); border-radius: 14px;
+  max-width: 62ch; font-size: 1.05rem; backdrop-filter: blur(2px); }
+.hero blockquote small { display: block; opacity: .8; margin-top: 4px; }
+.hero svg { position: absolute; left: 0; right: 0; bottom: -1px; width: 100%; height: 130px; }
+.sun { position: absolute; right: 8%; top: 40px; width: 110px; height: 110px; border-radius: 50%; border: 0; padding: 0;
+  background: radial-gradient(circle, #fff3c4, #ffd36e 60%, transparent 70%); opacity: .9; cursor: pointer;
+  transition: transform .3s; z-index: 1; }
+.sun:hover { transform: scale(1.08) rotate(-8deg); }
+.sun:focus-visible { outline: 3px solid #fff; outline-offset: 4px; }
+.stars { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .6s; }
+.stars::before { content: ""; position: absolute; left: 0; top: 0; width: 1px; height: 1px; border-radius: 50%;
+  box-shadow: 663px 38px 0 0 rgba(255,255,240,0.76), 148px 210px 0 1px rgba(255,255,240,0.45), 1193px 14px 0 1px rgba(255,255,240,0.52), 176px 111px 0 0 rgba(255,255,240,0.44), 185px 141px 0 0 rgba(255,255,240,0.43), 1158px 31px 0 0 rgba(255,255,240,0.75), 1193px 15px 0 1px rgba(255,255,240,0.72), 101px 56px 0 0 rgba(255,255,240,0.71), 272px 74px 0 0 rgba(255,255,240,0.48), 241px 146px 0 0 rgba(255,255,240,0.71), 1396px 46px 0 0 rgba(255,255,240,0.72), 1308px 48px 0 0 rgba(255,255,240,0.45), 1458px 16px 0 1px rgba(255,255,240,0.43), 421px 127px 0 1px rgba(255,255,240,0.69), 1591px 80px 0 0 rgba(255,255,240,0.72), 928px 92px 0 0 rgba(255,255,240,0.54), 368px 178px 0 0 rgba(255,255,240,0.45), 614px 134px 0 0 rgba(255,255,240,0.88), 1493px 114px 0 0 rgba(255,255,240,0.73), 149px 30px 0 1px rgba(255,255,240,0.63), 1550px 87px 0 0 rgba(255,255,240,0.91), 863px 10px 0 1px rgba(255,255,240,0.44), 1142px 146px 0 0 rgba(255,255,240,0.59), 717px 152px 0 0 rgba(255,255,240,0.72), 934px 17px 0 0 rgba(255,255,240,0.92), 970px 178px 0 1px rgba(255,255,240,0.44), 1497px 179px 0 0 rgba(255,255,240,0.76), 1395px 210px 0 0 rgba(255,255,240,0.56), 790px 227px 0 1px rgba(255,255,240,0.59), 945px 90px 0 0 rgba(255,255,240,0.74), 1011px 15px 0 0 rgba(255,255,240,0.82), 264px 189px 0 0 rgba(255,255,240,0.62), 1016px 20px 0 0 rgba(255,255,240,0.65), 1125px 71px 0 0 rgba(255,255,240,0.85), 1126px 71px 0 1px rgba(255,255,240,0.63), 734px 174px 0 0 rgba(255,255,240,0.93), 309px 21px 0 0 rgba(255,255,240,0.48), 1348px 59px 0 0 rgba(255,255,240,0.67), 1206px 46px 0 0 rgba(255,255,240,0.56), 298px 107px 0 1px rgba(255,255,240,0.60), 1159px 81px 0 0 rgba(255,255,240,0.78), 1055px 158px 0 1px rgba(255,255,240,0.77), 110px 116px 0 1px rgba(255,255,240,0.84), 803px 101px 0 0 rgba(255,255,240,0.62), 986px 162px 0 0 rgba(255,255,240,0.43), 137px 53px 0 0 rgba(255,255,240,0.49), 696px 153px 0 0 rgba(255,255,240,0.46), 1160px 38px 0 1px rgba(255,255,240,0.46), 744px 157px 0 0 rgba(255,255,240,0.44), 425px 157px 0 0 rgba(255,255,240,0.48), 516px 88px 0 1px rgba(255,255,240,0.60), 251px 29px 0 0 rgba(255,255,240,0.95), 954px 122px 0 0 rgba(255,255,240,0.57), 295px 26px 0 1px rgba(255,255,240,0.59), 542px 122px 0 1px rgba(255,255,240,0.49), 47px 52px 0 1px rgba(255,255,240,0.60), 1413px 139px 0 0 rgba(255,255,240,0.82), 610px 164px 0 0 rgba(255,255,240,0.78), 534px 132px 0 0 rgba(255,255,240,0.90), 728px 197px 0 0 rgba(255,255,240,0.69), 1595px 128px 0 0 rgba(255,255,240,0.75), 1255px 207px 0 0 rgba(255,255,240,0.84), 820px 189px 0 0 rgba(255,255,240,0.51), 1009px 91px 0 1px rgba(255,255,240,0.42), 57px 202px 0 0 rgba(255,255,240,0.66), 396px 177px 0 1px rgba(255,255,240,0.93), 915px 206px 0 1px rgba(255,255,240,0.94), 746px 20px 0 0 rgba(255,255,240,0.46), 962px 50px 0 0 rgba(255,255,240,0.51), 1278px 230px 0 1px rgba(255,255,240,0.86); }
+a.wiki { text-decoration: none; color: inherit; cursor: pointer; display: inline-block; transition: transform .15s; }
+h1 a.wiki:hover, .stats a.wiki:hover { transform: rotate(-12deg) scale(1.15); }
+.ground-layer { position: absolute; left: 0; right: 0; bottom: -1px; height: 130px; z-index: 1; pointer-events: none; }
+.walker { position: absolute; left: 0; top: 0; pointer-events: auto; font-size: 44px; line-height: 1;
+  transform-origin: 50% 100%; will-change: transform; }
+@media (max-width: 600px) { .sun { width: 64px; height: 64px; top: 12px; right: 12px; } }
+.disclaimer { margin: -48px auto 28px; position: relative; background: var(--card); border: 2px dashed var(--accent);
+  border-radius: 18px; padding: 18px 22px; }
+.disclaimer h2 { margin: 0 0 6px; font-size: 1.35rem; }
+.disclaimer p { margin: 6px 0; }
+.stats { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0 0; padding: 0; list-style: none; }
+.stats li { background: var(--chip); border-radius: 999px; padding: 4px 12px; font-weight: 700; }
+.lessons { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 0 0 36px; }
+.lesson { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px; }
+.lesson h3 { margin: 4px 0 8px; }
+.lesson ul { margin: 0; padding-left: 18px; }
+.lesson .big { font-size: 1.8rem; }
+.aside { color: var(--muted); font-size: .92rem; font-style: italic; }
+h2.section { font-size: 1.8rem; margin: 8px 0 14px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; overflow: hidden;
+  display: flex; flex-direction: column; transition: transform .15s, box-shadow .15s; }
+.card:hover { transform: translateY(-3px) rotate(-.3deg); box-shadow: 0 10px 24px rgba(0,0,0,.12); }
+.stage { position: relative; aspect-ratio: 16 / 10; background: linear-gradient(180deg, var(--sky1), var(--sky2));
+  display: grid; place-items: center; overflow: hidden; color: #fff; text-decoration: none; }
+.stage iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: #000; }
+.start { font: 700 1.05rem Fredoka, sans-serif; color: var(--accent-ink); background: var(--accent); border: 0;
+  border-radius: 999px; padding: 10px 18px; cursor: pointer; display: flex; align-items: center; gap: 8px;
+  box-shadow: 0 4px 0 rgba(0,0,0,.2); }
+.start:hover .emoji { display: inline-block; animation: bob .5s ease-in-out infinite alternate; }
+@keyframes bob { to { transform: translateY(-4px) rotate(6deg); } }
+.start .emoji { font-size: 1.4rem; }
+.stop { position: absolute; right: 8px; top: 8px; z-index: 1; font: 700 .8rem Nunito, sans-serif; border: 0;
+  border-radius: 999px; padding: 4px 10px; background: rgba(0,0,0,.6); color: #fff; cursor: pointer; }
+.body { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.body h3 { margin: 0; font-size: 1.2rem; display: flex; justify-content: space-between; gap: 8px; }
+.meta { margin: -6px 0 0; color: var(--muted); font-size: .9rem; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { background: var(--chip); border-radius: 999px; padding: 2px 10px; font-size: .85rem; white-space: nowrap; }
+.flag { cursor: help; }
+.meta { display: flex; justify-content: space-between; align-items: center; }
+.gp { font: 700 1.05rem Fredoka, sans-serif; padding: 2px 12px; border-radius: 999px; background: var(--chip); color: var(--ink); }
+.gp.pos { background: #2f9e55; color: #fff; } .gp.neg { background: #c2475e; color: #fff; }
+.vibes { display: flex; gap: 6px; align-items: center; }
+.rowlabel { flex: 0 0 7.6em; box-sizing: border-box; font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+  color: var(--muted); border-right: 2px solid var(--line); padding-right: 8px; margin-right: 2px; white-space: nowrap; }
+.vibe { cursor: help; border-radius: 10px; padding: 1px 6px; font-size: 1.15rem; border: 2px solid transparent; }
+.vibe.off { opacity: .22; filter: grayscale(1); }
+.vibe.unknown { opacity: .45; border: 2px dashed var(--line); }
+.bonus .vibe.on { background: rgba(47,158,85,.16); border-color: #2f9e55; }
+.penalty .vibe.on { background: rgba(194,71,94,.16); border-color: #c2475e; }
+.tag { margin: 0; font-size: .85rem; color: var(--muted); }
+code { font-size: .85em; background: var(--chip); padding: 1px 5px; border-radius: 6px; }
+.links { margin-top: auto; display: flex; flex-wrap: wrap; gap: 4px 14px; font-weight: 700; font-size: .92rem; }
+.links a { text-decoration: none; } .links a:hover { text-decoration: underline; }
+.legend { list-style: none; padding: 0; margin: 28px 0; display: grid; gap: 8px; color: var(--muted); }
+footer { border-top: 1px solid var(--line); margin-top: 40px; padding: 24px 0 40px; color: var(--muted); font-size: .95rem; }
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="stars" aria-hidden="true"></div>
+  <button class="sun" type="button" aria-label="Toggle day and night" title="Toggle day / night"></button>
+  <div class="wrap">
+    <h1>giraffe-bench <a class="wiki" href="https://en.wikipedia.org/wiki/Giraffe" target="_blank" rel="noopener" title="Meet a real giraffe (Wikipedia)">🦒</a></h1>
+    <p class="tagline">One prompt. Many models. Varying numbers of legs.</p>
+    <blockquote>“Please create an animation of a giraffe walking through a savannah environment using Three.js”<small>The exact prompt every model received.</small></blockquote>
+  </div>
+  <div class="ground-layer"><a class="walker wiki" href="https://en.wikipedia.org/wiki/Giraffe" target="_blank" rel="noopener" title="Meet a real giraffe (Wikipedia)">🦒</a></div>
+  <svg viewBox="0 0 1200 130" preserveAspectRatio="none" aria-hidden="true">
+    <path id="ground" d="M0 70 Q 150 50 300 64 Q 460 78 620 62 Q 760 46 900 64 Q 1050 78 1200 58 V130 H0Z" fill="var(--ground)"/>
+    <path d="M0 100 Q 200 88 420 102 T 820 96 T 1200 100 V130 H0Z" fill="var(--bg)"/>
+    <g fill="var(--tree)">
+      <rect x="168" y="22" width="6" height="38"/><ellipse cx="171" cy="20" rx="52" ry="11"/>
+      <rect x="958" y="22" width="7" height="48"/><ellipse cx="961" cy="20" rx="64" ry="13"/>
+    </g>
+  </svg>
+</header>
+
+<main class="wrap">
+  <section class="disclaimer">
+    <h2>⚠️ This is a Very Serious Benchmark™ (it is not)</h2>
+    <p>One giraffe per model, one prompt, zero rubric. Scoring is by vibes and leg count. Hosted models ran on their
+    vendors' servers; local ones ran on a laptop. Treat it as a field guide, not a leaderboard.</p>
+    <p>Still, a herd shows patterns a single giraffe can't. Here's what we've spotted so far 👇</p>
+    <ul class="stats">
+      <li><a class="wiki" href="https://en.wikipedia.org/wiki/Giraffe" target="_blank" rel="noopener" title="Meet a real giraffe (Wikipedia)">🦒</a> 9 giraffes</li><li>🧬 8 models</li>
+      <li>☁️ 5 hosted</li>
+      <li>💻 4 local</li>
+    </ul>
+  </section>
+  
+    <div class="lessons">
+      <div class="lesson"><span class="big">📦</span><h3>Which three.js?</h3><ul><li><b>three.js r128</b> × 4 — Claude Haiku 5.5, Claude Opus 5.5, Claude Sonnet 5.5, Qwen 3.8 27B</li><li><b>three.js r160</b> × 2 — Gemma 4 12B, Muse Glimmer 30B</li><li><b>three.js r162</b> × 1 — Nemotron 3.5 Lightning 30B</li><li><b>three.js r169</b> × 1 — ChatGPT Sol 6.1</li><li><b>three.js r170</b> × 1 — ChatGPT Sol 6.1</li></ul>
+        <p class="aside">r128 is from 2021: the version all over the training data.</p></div>
+      <div class="lesson"><span class="big">📏</span><h3>Giraffe mass</h3>
+        <p>Smallest: <b>Muse Glimmer 30B</b> at 5 KB.<br>
+        Biggest: <b>ChatGPT Sol 6.1</b> at 91 KB.</p>
+        <p class="aside">Bytes are not legs. Size measures ambition, not gait.</p></div>
+      <div class="lesson"><span class="big">🧭</span><h3>Getting a file at all</h3>
+        <p><b>2</b> of 9 giraffes needed a follow-up prompt before an HTML file appeared.
+        <b>4</b> ran on a laptop.</p>
+        <p class="aside">The app around a model shapes the result as much as the model does.</p></div>
+      <div class="lesson"><span class="big">🔍</span><h3>Vibe check</h3><p>🏆 Top score <b>+4 GP</b>: ChatGPT Sol 6.1, Claude Opus 5.5, Claude Sonnet 5.5.</p><ul><li>🦵 <b>Four legs</b>: 8 of 9</li><li>🚶 <b>Actually walks</b>: 6 of 9</li><li>🦒 <b>Giraffe-shaped</b>: 5 of 9</li><li>🌅 <b>Real savannah</b>: 5 of 9</li><li>😱 <b>Nightmare fuel</b>: 4 of 9</li><li>👻 <b>Ghost giraffe</b>: 4 of 9</li><li>🚪 <b>Wanders off</b>: 2 of 9</li></ul><p class="aside">Judged by one human with taste.</p></div>
+    </div>
+
+  <h2 class="section">The herd</h2>
+  <div class="grid">
+      <article class="card">
+        <div class="stage" data-src="claude-opus-5-5/2026-10-22_medium.html"><button class="start" type="button"><span class="emoji">🦒</span>▶ Watch it walk</button></div>
+        <div class="body">
+          <h3>Claude Opus 5.5 <span class="flags"></span></h3>
+          <p class="meta">2026-10-22 <span class="gp pos" title="Giraffe Points: bonuses minus penalties">+4 GP</span></p>
+          <div class="vibes bonus"><span class="rowlabel">🌟 Bonus</span><span class="vibe on" title="Four legs: Four legs, attached where legs go? (+1)">🦵</span><span class="vibe on" title="Actually walks: Do the legs carry it forward? (+1)">🚶</span><span class="vibe on" title="Giraffe-shaped: Would a child point at it and say &#x27;giraffe&#x27;? (+1)">🦒</span><span class="vibe on" title="Real savannah: Acacias, golden grass, a sky worth looking at? (+1)">🌅</span></div><div class="vibes penalty"><span class="rowlabel">💀 Penalty</span><span class="vibe off" title="Nightmare fuel: Will it visit you at 3 a.m.? (0)">😱</span><span class="vibe off" title="Ghost giraffe: Clips through the ground, or floats above it? (0)">👻</span><span class="vibe off" title="Wanders off: Leaves the shot while the camera just... watches? (0)">🚪</span></div>
+          <div class="chips"><span class="chip" title="">☁️ hosted</span><span class="chip" title="effort / thinking setting">🧠 medium</span><span class="chip" title="three.js version">📦 three r128</span><span class="chip" title="file size">📏 18 KB</span></div>
+          
+          <nav class="links"><a href="claude-opus-5-5/2026-10-22_medium.html" target="_blank" rel="noopener">↗ full screen</a> <a href="https://github.com/niznik-dev/giraffe-bench/blob/main/claude-opus-5-5/2026-10-22_medium.html" target="_blank" rel="noopener">📜 source</a></nav>
+        </div>
+      </article>
+      <article class="card">
+        <div class="stage" data-src="claude-sonnet-5-5/2026-10-22_medium.html"><button class="start" type="button"><span class="emoji">🦒</span>▶ Watch it walk</button></div>
+        <div class="body">
+          <h3>Claude Sonnet 5.5 <span class="flags"></span></h3>
+          <p class="meta">2026-10-22 <span class="gp pos" title="Giraffe Points: bonuses minus penalties">+4 GP</span></p>
+          <div class="vibes bonus"><span class="rowlabel">🌟 Bonus</span><span class="vibe on" title="Four legs: Four legs, attached where legs go? (+1)">🦵</span><span class="vibe on" title="Actually walks: Do the legs carry it forward? (+1)">🚶</span><span class="vibe on" title="Giraffe-shaped: Would a child point at it and say &#x27;giraffe&#x27;? (+1)">🦒</span><span class="vibe on" title="Real savannah: Acacias, golden grass, a sky worth looking at? (+1)">🌅</span></div><div class="vibes penalty"><span class="rowlabel">💀 Penalty</span><span class="vibe off" title="Nightmare fuel: Will it visit you at 3 a.m.? (0)">😱</span><span class="vibe off" title="Ghost giraffe: Clips through the ground, or floats above it? (0)">👻</span><span class="vibe off" title="Wanders off: Leaves the shot while the camera just... watches? (0)">🚪</span></div>
+          <div class="chips"><span class="chip" title="">☁️ hosted</span><span class="chip" title="effort / thinking setting">🧠 medium</span><span class="chip" title="three.js version">📦 three r128</span><span class="chip" title="file size">📏 19 KB</span></div>
+          
+          <nav class="links"><a href="claude-sonnet-5-5/2026-10-22_medium.html" target="_blank" rel="noopener">↗ full screen</a> <a href="https://github.com/niznik-dev/giraffe-bench/blob/main/claude-sonnet-5-5/2026-10-22_medium.html" target="_blank" rel="noopener">📜 source</a></nav>
+        </div>
+      </article>
+      <article class="card">
+        <div class="stage" data-src="claude-haiku-5-5/2026-10-22_medium.html"><button class="start" type="button"><span class="emoji">🦒</span>▶ Watch it walk</button></div>
+        <div class="body">
+          <h3>Claude Haiku 5.5 <span class="flags"></span></h3>
+          <p class="meta">2026-10-22 <span class="gp pos" title="Giraffe Points: bonuses minus penalties">+3 GP</span></p>
+          <div class="vibes bonus"><span class="rowlabel">🌟 Bonus</span><span class="vibe on" title="Four legs: Four legs, attached where legs go? (+1)">🦵</span><span class="vibe on" title="Actually walks: Do the legs carry it forward? (+1)">🚶</span><span class="vibe off" title="Giraffe-shaped: Would a child point at it and say &#x27;giraffe&#x27;? (0)">🦒</span><span class="vibe on" title="Real savannah: Acacias, golden grass, a sky worth looking at? (+1)">🌅</span></div><div class="vibes penalty"><span class="rowlabel">💀 Penalty</span><span class="vibe off" title="Nightmare fuel: Will it visit you at 3 a.m.? (0)">😱</span><span class="vibe off" title="Ghost giraffe: Clips through the ground, or floats above it? (0)">👻</span><span class="vibe off" title="Wanders off: Leaves the shot while the camera just... watches? (0)">🚪</span></div>
+          <div class="chips"><span class="chip" title="">☁️ hosted</span><span class="chip" title="effort / thinking setting">🧠 medium</span><span class="chip" title="three.js version">📦 three r128</span><span class="chip" title="file size">📏 10 KB</span></div>
+          
+          <nav class="links"><a href="claude-haiku-5-5/2026-10-22_medium.html" target="_blank" rel="noopener">↗ full screen</a> <a href="https://github.com/niznik-dev/giraffe-bench/blob/main/claude-haiku-5-5/2026-10-22_medium.html" target="_blank" rel="noopener">📜 source</a></nav>
+        </div>
+      </article>
+      <article class="card">
+        <div class="stage" data-src="chatgpt-sol-6-1/2026-10-22_xhigh.html"><button class="start" type="button"><span class="emoji">🦒</span>▶ Watch it walk</button></div>
+        <div class="body">
+          <h3>ChatGPT Sol 6.1 <span class="flags"><span class="flag" title="ChatGPT detour: The first reply wasn&#x27;t obviously an HTML file. Asked &quot;Is this an HTML file I can download?&quot; and received a viewer-wrapped HTML file; the giraffe page was recovered from inside it.">😵‍💫</span></span></h3>
+          <p class="meta">2026-10-22 <span class="gp pos" title="Giraffe Points: bonuses minus penalties">+4 GP</span></p>
+          <div class="vibes bonus"><span class="rowlabel">🌟 Bonus</span><span class="vibe on" title="Four legs: Four legs, attached where legs go? (+1)">🦵</span><span class="vibe on" title="Actually walks: Do the legs carry it forward? (+1)">🚶</span><span class="vibe on" title="Giraffe-shaped: Would a child point at it and say &#x27;giraffe&#x27;? (+1)">🦒</span><span class="vibe on" title="Real savannah: Acacias, golden grass, a sky worth looking at? (+1)">🌅</span></div><div class="vibes penalty"><span class="rowlabel">💀 Penalty</span><span class="vibe off" title="Nightmare fuel: Will it visit you at 3 a.m.? (0)">😱</span><span class="vibe off" title="Ghost giraffe: Clips through the ground, or floats above it? (0)">👻</span><span class="vibe off" title="Wanders off: Leaves the shot while the camera just... watches? (0)">🚪</span></div>
+          <div class="chips"><span class="chip" title="">☁️ hosted</span><span class="chip" title="effort / thinking setting">🧠 xhigh</span><span class="chip" title="three.js version">📦 three r169</span><span class="chip" title="file size">📏 91 KB</span></div>
+          
+          <nav class="links"><a href="chatgpt-sol-6-1/2026-10-22_xhigh.html" target="_blank" rel="noopener">↗ full screen</a> <a href="https://github.com/niznik-dev/giraffe-bench/blob/main/chatgpt-sol-6-1/2026-10-22_xhigh.html" target="_blank" rel="noopener">📜 source</a> <a href="chatgpt-sol-6-1/2026-10-22_xhigh.wrapper.html" target="_blank" rel="noopener">🎁 as delivered</a></nav>
+        </div>
+      </article>
+      <article class="card">
+        <div class="stage" data-src="chatgpt-sol-6-1/2026-10-22_medium.html"><button class="start" type="button"><span class="emoji">🦒</span>▶ Watch it walk</button></div>
+        <div class="body">
+          <h3>ChatGPT Sol 6.1 <span class="flags"><span class="flag" title="ChatGPT detour: The first reply wasn&#x27;t obviously an HTML file. Asked &quot;Is this an HTML file I can download?&quot; and received a viewer-wrapped HTML file; the giraffe page was recovered from inside it.">😵‍💫</span></span></h3>
+          <p class="meta">2026-10-22 <span class="gp pos" title="Giraffe Points: bonuses minus penalties">+3 GP</span></p>
+          <div class="vibes bonus"><span class="rowlabel">🌟 Bonus</span><span class="vibe on" title="Four legs: Four legs, attached where legs go? (+1)">🦵</span><span class="vibe on" title="Actually walks: Do the legs carry it forward? (+1)">🚶</span><span class="vibe on" title="Giraffe-shaped: Would a child point at it and say &#x27;giraffe&#x27;? (+1)">🦒</span><span class="vibe on" title="Real savannah: Acacias, golden grass, a sky worth looking at? (+1)">🌅</span></div><div class="vibes penalty"><span class="rowlabel">💀 Penalty</span><span class="vibe off" title="Nightmare fuel: Will it visit you at 3 a.m.? (0)">😱</span><span class="vibe on" title="Ghost giraffe: Clips through the ground, or floats above it? (-1)">👻</span><span class="vibe off" title="Wanders off: Leaves the shot while the camera just... watches? (0)">🚪</span></div>
+          <div class="chips"><span class="chip" title="">☁️ hosted</span><span class="chip" title="effort / thinking setting">🧠 medium</span><span class="chip" title="three.js version">📦 three r170</span><span class="chip" title="file size">📏 72 KB</span></div>
+          
+          <nav class="links"><a href="chatgpt-sol-6-1/2026-10-22_medium.html" target="_blank" rel="noopener">↗ full screen</a> <a href="https://github.com/niznik-dev/giraffe-bench/blob/main/chatgpt-sol-6-1/2026-10-22_medium.html" target="_blank" rel="noopener">📜 source</a> <a href="chatgpt-sol-6-1/2026-10-22_medium.wrapper.html" target="_blank" rel="noopener">🎁 as delivered</a></nav>
+        </div>
+      </article>
+      <article class="card">
+        <div class="stage" data-src="nemotron-3-5-lightning-30b-nvfp4/2026-10-22_default.html"><button class="start" type="button"><span class="emoji">🦒</span>▶ Watch it “walk”</button></div>
+        <div class="body">
+          <h3>Nemotron 3.5 Lightning 30B <span class="flags"><span class="flag" title="Local run: MacBook Pro (Apple M2 Pro, 32 GB) through Cherry Studio → Ollama 0.40.4. Effort is Cherry&#x27;s thinking setting; the level Ollama actually ran is a best guess from each model&#x27;s default.">💻</span></span></h3>
+          <p class="meta">2026-10-22 <span class="gp neg" title="Giraffe Points: bonuses minus penalties">-2 GP</span></p>
+          <div class="vibes bonus"><span class="rowlabel">🌟 Bonus</span><span class="vibe off" title="Four legs: Four legs, attached where legs go? (0)">🦵</span><span class="vibe off" title="Actually walks: Do the legs carry it forward? (0)">🚶</span><span class="vibe off" title="Giraffe-shaped: Would a child point at it and say &#x27;giraffe&#x27;? (0)">🦒</span><span class="vibe off" title="Real savannah: Acacias, golden grass, a sky worth looking at? (0)">🌅</span></div><div class="vibes penalty"><span class="rowlabel">💀 Penalty</span><span class="vibe on" title="Nightmare fuel: Will it visit you at 3 a.m.? (-1)">😱</span><span class="vibe on" title="Ghost giraffe: Clips through the ground, or floats above it? (-1)">👻</span><span class="vibe off" title="Wanders off: Leaves the shot while the camera just... watches? (0)">🚪</span></div>
+          <div class="chips"><span class="chip" title="">💻 local</span><span class="chip" title="quantization">🗜️ nvfp4</span><span class="chip" title="effort / thinking setting">🧠 default</span><span class="chip" title="three.js version">📦 three r162</span><span class="chip" title="file size">📏 7 KB</span></div>
+          <p class="tag">Ollama tag <code>nemotron-3.5-lightning:30b-mlx</code>, likely thinking <code>true</code></p>
+          <nav class="links"><a href="nemotron-3-5-lightning-30b-nvfp4/2026-10-22_default.html" target="_blank" rel="noopener">↗ full screen</a> <a href="https://github.com/niznik-dev/giraffe-bench/blob/main/nemotron-3-5-lightning-30b-nvfp4/2026-10-22_default.html" target="_blank" rel="noopener">📜 source</a></nav>
+        </div>
+      </article>
+      <article class="card">
+        <div class="stage" data-src="muse-glimmer-30b-nvfp4/2026-10-22_default.html"><button class="start" type="button"><span class="emoji">🦒</span>▶ Watch it walk</button></div>
+        <div class="body">
+          <h3>Muse Glimmer 30B <span class="flags"><span class="flag" title="Local run: MacBook Pro (Apple M2 Pro, 32 GB) through Cherry Studio → Ollama 0.40.4. Effort is Cherry&#x27;s thinking setting; the level Ollama actually ran is a best guess from each model&#x27;s default.">💻</span></span></h3>
+          <p class="meta">2026-10-22 <span class="gp neg" title="Giraffe Points: bonuses minus penalties">-1 GP</span></p>
+          <div class="vibes bonus"><span class="rowlabel">🌟 Bonus</span><span class="vibe on" title="Four legs: Four legs, attached where legs go? (+1)">🦵</span><span class="vibe on" title="Actually walks: Do the legs carry it forward? (+1)">🚶</span><span class="vibe off" title="Giraffe-shaped: Would a child point at it and say &#x27;giraffe&#x27;? (0)">🦒</span><span class="vibe off" title="Real savannah: Acacias, golden grass, a sky worth looking at? (0)">🌅</span></div><div class="vibes penalty"><span class="rowlabel">💀 Penalty</span><span class="vibe on" title="Nightmare fuel: Will it visit you at 3 a.m.? (-1)">😱</span><span class="vibe on" title="Ghost giraffe: Clips through the ground, or floats above it? (-1)">👻</span><span class="vibe on" title="Wanders off: Leaves the shot while the camera just... watches? (-1)">🚪</span></div>
+          <div class="chips"><span class="chip" title="">💻 local</span><span class="chip" title="quantization">🗜️ nvfp4</span><span class="chip" title="effort / thinking setting">🧠 default</span><span class="chip" title="three.js version">📦 three r160</span><span class="chip" title="file size">📏 5 KB</span></div>
+          <p class="tag">Ollama tag <code>muse-glimmer:30b-mlx</code>, likely thinking <code>high</code></p>
+          <nav class="links"><a href="muse-glimmer-30b-nvfp4/2026-10-22_default.html" target="_blank" rel="noopener">↗ full screen</a> <a href="https://github.com/niznik-dev/giraffe-bench/blob/main/muse-glimmer-30b-nvfp4/2026-10-22_default.html" target="_blank" rel="noopener">📜 source</a></nav>
+        </div>
+      </article>
+      <article class="card">
+        <div class="stage" data-src="gemma4-12b-q4km/2026-10-22_default.html"><button class="start" type="button"><span class="emoji">🦒</span>▶ Watch it “walk”</button></div>
+        <div class="body">
+          <h3>Gemma 4 12B <span class="flags"><span class="flag" title="Local run: MacBook Pro (Apple M2 Pro, 32 GB) through Cherry Studio → Ollama 0.40.4. Effort is Cherry&#x27;s thinking setting; the level Ollama actually ran is a best guess from each model&#x27;s default.">💻</span></span></h3>
+          <p class="meta">2026-10-22 <span class="gp neg" title="Giraffe Points: bonuses minus penalties">-1 GP</span></p>
+          <div class="vibes bonus"><span class="rowlabel">🌟 Bonus</span><span class="vibe on" title="Four legs: Four legs, attached where legs go? (+1)">🦵</span><span class="vibe off" title="Actually walks: Do the legs carry it forward? (0)">🚶</span><span class="vibe off" title="Giraffe-shaped: Would a child point at it and say &#x27;giraffe&#x27;? (0)">🦒</span><span class="vibe off" title="Real savannah: Acacias, golden grass, a sky worth looking at? (0)">🌅</span></div><div class="vibes penalty"><span class="rowlabel">💀 Penalty</span><span class="vibe on" title="Nightmare fuel: Will it visit you at 3 a.m.? (-1)">😱</span><span class="vibe off" title="Ghost giraffe: Clips through the ground, or floats above it? (0)">👻</span><span class="vibe on" title="Wanders off: Leaves the shot while the camera just... watches? (-1)">🚪</span></div>
+          <div class="chips"><span class="chip" title="">💻 local</span><span class="chip" title="quantization">🗜️ q4km</span><span class="chip" title="effort / thinking setting">🧠 default</span><span class="chip" title="three.js version">📦 three r160</span><span class="chip" title="file size">📏 5 KB</span></div>
+          <p class="tag">Ollama tag <code>gemma4:12b</code>, likely thinking <code>true</code></p>
+          <nav class="links"><a href="gemma4-12b-q4km/2026-10-22_default.html" target="_blank" rel="noopener">↗ full screen</a> <a href="https://github.com/niznik-dev/giraffe-bench/blob/main/gemma4-12b-q4km/2026-10-22_default.html" target="_blank" rel="noopener">📜 source</a></nav>
+        </div>
+      </article>
+      <article class="card">
+        <div class="stage" data-src="qwen3-8-27b-nvfp4/2026-10-22_default.html"><button class="start" type="button"><span class="emoji">🦒</span>▶ Watch it “walk”</button></div>
+        <div class="body">
+          <h3>Qwen 3.8 27B <span class="flags"><span class="flag" title="Local run: MacBook Pro (Apple M2 Pro, 32 GB) through Cherry Studio → Ollama 0.40.4. Effort is Cherry&#x27;s thinking setting; the level Ollama actually ran is a best guess from each model&#x27;s default.">💻</span></span></h3>
+          <p class="meta">2026-10-22 <span class="gp zero" title="Giraffe Points: bonuses minus penalties">+0 GP</span></p>
+          <div class="vibes bonus"><span class="rowlabel">🌟 Bonus</span><span class="vibe on" title="Four legs: Four legs, attached where legs go? (+1)">🦵</span><span class="vibe off" title="Actually walks: Do the legs carry it forward? (0)">🚶</span><span class="vibe on" title="Giraffe-shaped: Would a child point at it and say &#x27;giraffe&#x27;? (+1)">🦒</span><span class="vibe off" title="Real savannah: Acacias, golden grass, a sky worth looking at? (0)">🌅</span></div><div class="vibes penalty"><span class="rowlabel">💀 Penalty</span><span class="vibe on" title="Nightmare fuel: Will it visit you at 3 a.m.? (-1)">😱</span><span class="vibe on" title="Ghost giraffe: Clips through the ground, or floats above it? (-1)">👻</span><span class="vibe off" title="Wanders off: Leaves the shot while the camera just... watches? (0)">🚪</span></div>
+          <div class="chips"><span class="chip" title="">💻 local</span><span class="chip" title="quantization">🗜️ nvfp4</span><span class="chip" title="effort / thinking setting">🧠 default</span><span class="chip" title="three.js version">📦 three r128</span><span class="chip" title="file size">📏 29 KB</span></div>
+          <p class="tag">Ollama tag <code>qwen3.8:27b-mlx</code>, likely thinking <code>medium</code></p>
+          <nav class="links"><a href="qwen3-8-27b-nvfp4/2026-10-22_default.html" target="_blank" rel="noopener">↗ full screen</a> <a href="https://github.com/niznik-dev/giraffe-bench/blob/main/qwen3-8-27b-nvfp4/2026-10-22_default.html" target="_blank" rel="noopener">📜 source</a></nav>
+        </div>
+      </article>
+  </div>
+
+  <ul class="legend"><li><span class="flag">💻</span> <b>Local run.</b> MacBook Pro (Apple M2 Pro, 32 GB) through Cherry Studio → Ollama 0.40.4. Effort is Cherry&#x27;s thinking setting; the level Ollama actually ran is a best guess from each model&#x27;s default.</li><li><span class="flag">😵‍💫</span> <b>ChatGPT detour.</b> The first reply wasn&#x27;t obviously an HTML file. Asked &quot;Is this an HTML file I can download?&quot; and received a viewer-wrapped HTML file; the giraffe page was recovered from inside it.</li></ul>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>Started as a live demo for the October 2026 meeting of Princeton Research Computing's
+    <a href="https://researchcomputing.princeton.edu/learn/user-groups/llm-collective">LLM Collective</a>.
+    Thanks to <a href="https://github.com/pilambdaepsilon">Pedro Espino</a> for suggesting the giraffe, and to
+    <a href="https://www.reddit.com/r/ClaudeAI/comments/1wpq8by/testing_claude_for_3d_creation_max_took_a_whole/">this r/ClaudeAI post</a>
+    for the original idea.</p>
+    <p>Pages are model output, shown as delivered and sandboxed. 🐙 <a href="https://github.com/niznik-dev/giraffe-bench">Source, naming rules &amp; how to add a giraffe</a></p>
+  </div>
+</footer>
+<script>
+// The sun is a day/night switch; it starts from the visitor's system theme.
+(() => {
+  const root = document.documentElement, dark = matchMedia('(prefers-color-scheme: dark)');
+  const isNight = () => root.dataset.theme ? root.dataset.theme === 'dark' : dark.matches;
+  const sun = document.querySelector('.sun');
+  const label = () => sun.title = isNight() ? 'Bring back the sun' : 'Send the sun to bed';
+  sun.addEventListener('click', () => {
+    root.dataset.theme = isNight() ? 'light' : 'dark';
+    try { localStorage.setItem('giraffe-theme', root.dataset.theme); } catch (e) {}
+    label();
+  });
+  dark.addEventListener('change', label);
+  label();
+})();
+
+// Walk the hero giraffe along the ground curve, tilting with the slope.
+(() => {
+  const walker = document.querySelector('.walker'), ground = document.getElementById('ground');
+  const layer = walker.parentElement;  // pinned to the same box as the ground SVG
+  const VIEW_W = 1200, LAP_MS = 38000, SINK = 6;
+  const groundY = new Float32Array(VIEW_W + 1);  // ground height at each viewBox x
+  for (let len = 0, total = ground.getTotalLength(); len <= total; len += 0.5) {
+    const pt = ground.getPointAtLength(len);
+    if (pt.x > VIEW_W || pt.y > 125) break;  // past the top edge, into the V/H closing segments
+    groundY[Math.round(pt.x)] = pt.y;
+  }
+  const yAt = x => groundY[Math.max(0, Math.min(VIEW_W, Math.round(x)))];
+  let box;
+  const measure = () => {
+    const w = layer.clientWidth;
+    box = {top: 0, scaleX: w / VIEW_W, scaleY: layer.clientHeight / 130, width: w, size: walker.offsetHeight};
+  };
+  const place = px => {
+    const vx = px / box.scaleX, y = box.top + yAt(vx) * box.scaleY;
+    const slope = (yAt(vx + 8) - yAt(vx - 8)) * box.scaleY / (16 * box.scaleX);
+    const angle = Math.atan(slope) * 180 / Math.PI;
+    walker.style.transform = `translate(${px - box.size / 2}px, ${y - box.size + SINK}px) rotate(${angle}deg) scaleX(-1)`;
+  };
+  measure();
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const still = () => { measure(); place(box.width * 0.12); };
+    still(); addEventListener('resize', still); document.fonts?.ready.then(still);
+    return;
+  }
+  const tick = () => {
+    measure();
+    const span = box.width + 2 * box.size;
+    place((performance.now() % LAP_MS) / LAP_MS * span - box.size);
+    requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+})();
+
+document.querySelectorAll('.stage[data-src]').forEach(stage => {
+  const idle = stage.innerHTML;
+  stage.addEventListener('click', ev => {
+    if (!ev.target.closest('.start')) return;
+    stage.innerHTML = '';
+    const f = document.createElement('iframe');
+    f.src = stage.dataset.src; f.title = 'giraffe'; f.setAttribute('sandbox', 'allow-scripts');
+    const stop = document.createElement('button');
+    stop.className = 'stop'; stop.type = 'button'; stop.textContent = '■ stop';
+    stop.addEventListener('click', () => { stage.innerHTML = idle; });
+    stage.append(f, stop);
+  });
+});
+</script>
+</body>
+</html>
