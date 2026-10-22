@@ -20,8 +20,8 @@ claude-opus-5-5/
   2026-10-22_medium.html
   2026-10-22_medium-2.html   # second medium-effort giraffe that day
   2026-10-22_high.html
-qwen3-27b/
-  2026-09-30.html            # no effort setting → no suffix
+qwen3-27b-q4km/
+  2026-09-30.html            # local model: quant in folder, no effort suffix
 ```
 
 ## Naming rules
@@ -29,6 +29,7 @@ qwen3-27b/
 | Part | Rule | Example |
 |------|------|---------|
 | `model-slug` | Lowercase kebab-case; dots and spaces → `-`; drop vendor prefixes, but keep a product name when the model name is obscure without it | `claude-opus-5-5`, `qwen3-27b`, `chatgpt-sol-6-1` |
+| `-quant` (local models) | Appended to the model slug: lowercase, punctuation dropped. Hosted models omit it. Runtime (Ollama, llama.cpp, transformers…) goes in Notes | `qwen3-27b-q4km/`, `qwen3-27b-bf16/` |
 | `YYYY-MM-DD` | Date the page was **generated** (use the date collected if unknown) | `2026-10-22` |
 | `_effort` | Reasoning effort, lowercase, **no hyphens** (they'd clash with `-n`); omit if the model has no such setting | `_low`, `_medium`, `_high`, `_xhigh`, `_max` |
 | `-n` suffix | Only for duplicates with the same model, day, and effort, starting at `-2` | `2026-10-22_medium-2.html` |
