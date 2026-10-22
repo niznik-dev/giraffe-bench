@@ -20,9 +20,12 @@ NAME_RE = re.compile(r"^(?P<date>\d{4}-\d{2}-\d{2})(?:_(?P<effort>[a-z0-9]+))?(?
 VIBES = [  # (key, emoji, name, question, points)
     ("legs", "🦵", "Four legs", "Four legs, attached where legs go?", +1),
     ("walks", "🚶", "Actually walks", "Do the legs carry it forward?", +1),
+    ("flex", "🤸", "Legs flex", "Do the legs actually bend at the joints, rather than swinging like stiff poles?", +1),
+    ("hocks", "🦴", "Proper hocks", "Do the hind legs bend at the hock (pointing backward), not like human knees?", +1),
     ("giraffe", "🦒", "Giraffe-shaped", "Would a child point at it and say 'giraffe'?", +1),
     ("savannah", "🌅", "Real savannah", "Acacias, golden grass, a sky worth looking at?", +1),
     ("nightmare", "😱", "Nightmare fuel", "Will it visit you at 3 a.m.?", -1),
+    ("frontlegs", "🔄", "Backwards front legs", "Front legs bend the wrong way, or are attached backwards?", -1),
     ("ghost", "👻", "Ghost giraffe", "Clips through the ground, or floats above it?", -1),
     ("wanders", "🚪", "Wanders off", "Leaves the shot while the camera just... watches?", -1),
 ]
@@ -227,7 +230,7 @@ def card(e, flags, order):
             state = {"yes": "on", "no": "off"}.get(verdict, "unknown")
             mark = {"yes": f"{pts:+d}", "no": "0"}.get(verdict, "not judged yet")
             spans.append(f'<span class="vibe {state}" title="{esc(name)}: {esc(question)} ({mark})">{emoji}</span>')
-        return f'<div class="vibes {label}"><span class="rowlabel">{"🌟 Bonus" if sign > 0 else "💀 Penalty"}</span>{"".join(spans)}</div>'
+        return f'<div class="vibes {label}"><span class="rowlabel" title="{"Bonuses: +1 each" if sign > 0 else "Penalties: −1 each"}">{"+" if sign > 0 else "−"}</span>{"".join(spans)}</div>'
 
     score = gp(e)
     gp_class = "unknown" if score is None else "pos" if score > 0 else "neg" if score < 0 else "zero"
@@ -524,10 +527,10 @@ h2.section {{ font-size: 1.8rem; margin: 8px 0 14px; }}
 .nest .emoji {{ font-size: 2.8rem; display: inline-block; animation: wobble 2.4s ease-in-out infinite; }}
 @keyframes wobble {{ 0%, 70%, 100% {{ transform: rotate(0); }} 76% {{ transform: rotate(-12deg); }} 84% {{ transform: rotate(10deg); }} 92% {{ transform: rotate(-5deg); }} }}
 @media (prefers-reduced-motion: reduce) {{ .nest .emoji {{ animation: none; }} }}
-.vibes {{ display: flex; gap: 6px; align-items: center; }}
-.rowlabel {{ flex: 0 0 7.6em; box-sizing: border-box; font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
-  color: var(--muted); border-right: 2px solid var(--line); padding-right: 8px; margin-right: 2px; white-space: nowrap; }}
-.vibe {{ cursor: help; border-radius: 10px; padding: 1px 6px; font-size: 1.15rem; border: 2px solid transparent; }}
+.vibes {{ display: flex; gap: 4px; align-items: center; }}
+.rowlabel {{ flex: 0 0 1em; text-align: center; font: 900 1.55rem/1 Nunito, system-ui, sans-serif; border-right: 2px solid var(--line); padding-right: 6px; margin-right: 2px; cursor: help; }}
+.vibe {{ cursor: help; border-radius: 9px; padding: 1px 4px; font-size: 1rem; border: 2px solid transparent; }}
+.bonus .rowlabel {{ color: #2f9e55; }} .penalty .rowlabel {{ color: #c2475e; }}
 .vibe.off {{ opacity: .22; filter: grayscale(1); }}
 .vibe.unknown {{ opacity: .45; border: 2px dashed var(--line); }}
 .bonus .vibe.on {{ background: rgba(47,158,85,.16); border-color: #2f9e55; }}

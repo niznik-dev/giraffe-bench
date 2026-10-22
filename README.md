@@ -18,22 +18,22 @@ for the original idea of testing models on 3D creation.
 <!-- gallery:start -->
 | Model | Effort | Date | Page | GP | Vibe check | ⚑ |
 |-------|--------|------|------|----|------------|---|
-| claude-opus-5-5 | medium | 2026-10-22 | [2026-10-22_medium.html](claude-opus-5-5/2026-10-22_medium.html) | **+4** | +🦵🚶🦒🌅 |  |
-| claude-sonnet-5-5 | medium | 2026-10-22 | [2026-10-22_medium.html](claude-sonnet-5-5/2026-10-22_medium.html) | **+4** | +🦵🚶🦒🌅 |  |
-| claude-haiku-5-5 | medium | 2026-10-22 | [2026-10-22_medium.html](claude-haiku-5-5/2026-10-22_medium.html) | **+3** | +🦵🚶🌅 |  |
-| chatgpt-sol-6-1 | xhigh | 2026-10-22 | [2026-10-22_xhigh.html](chatgpt-sol-6-1/2026-10-22_xhigh.html) | **+4** | +🦵🚶🦒🌅 | 😵‍💫 |
-| chatgpt-sol-6-1 | medium | 2026-10-22 | [2026-10-22_medium.html](chatgpt-sol-6-1/2026-10-22_medium.html) | **+3** | +🦵🚶🦒🌅 −👻 | 😵‍💫 |
-| gemini-4-argon | medium | 2026-10-22 | [2026-10-22_medium.html](gemini-4-argon/2026-10-22_medium.html) | **+4** | +🦵🚶🦒🌅 |  |
-| gemini-4-argon | high | 2026-10-22 | [2026-10-22_high.html](gemini-4-argon/2026-10-22_high.html) | **+4** | +🦵🚶🦒🌅 |  |
+| claude-opus-5-5 | medium | 2026-10-22 | [2026-10-22_medium.html](claude-opus-5-5/2026-10-22_medium.html) | **+5** | +🦵🚶🤸🦒🌅 |  |
+| claude-sonnet-5-5 | medium | 2026-10-22 | [2026-10-22_medium.html](claude-sonnet-5-5/2026-10-22_medium.html) | **+5** | +🦵🚶🤸🦒🌅 |  |
+| claude-haiku-5-5 | medium | 2026-10-22 | [2026-10-22_medium.html](claude-haiku-5-5/2026-10-22_medium.html) | **+4** | +🦵🚶🤸🦴🌅 −🔄 |  |
+| chatgpt-sol-6-1 | xhigh | 2026-10-22 | [2026-10-22_xhigh.html](chatgpt-sol-6-1/2026-10-22_xhigh.html) | **+6** | +🦵🚶🤸🦴🦒🌅 | 😵‍💫 |
+| chatgpt-sol-6-1 | medium | 2026-10-22 | [2026-10-22_medium.html](chatgpt-sol-6-1/2026-10-22_medium.html) | **+4** | +🦵🚶🤸🦴🦒🌅 −🔄👻 | 😵‍💫 |
+| gemini-4-argon | medium | 2026-10-22 | [2026-10-22_medium.html](gemini-4-argon/2026-10-22_medium.html) | **+5** | +🦵🚶🤸🦴🦒🌅 −🔄 |  |
+| gemini-4-argon | high | 2026-10-22 | [2026-10-22_high.html](gemini-4-argon/2026-10-22_high.html) | **+5** | +🦵🚶🤸🦒🌅 |  |
 | gemini-3-5-flash-lite | medium | 2026-10-22 | [2026-10-22_medium.html](gemini-3-5-flash-lite/2026-10-22_medium.html) | **-1** | +🦵 −😱👻 |  |
-| gemini-3-8-flash | medium | 2026-10-22 | [2026-10-22_medium.html](gemini-3-8-flash/2026-10-22_medium.html) | **+2** | +🦵🦒🌅 −😱 |  |
+| gemini-3-8-flash | medium | 2026-10-22 | [2026-10-22_medium.html](gemini-3-8-flash/2026-10-22_medium.html) | **+3** | +🦵🤸🦴🦒🌅 −😱🔄 |  |
 | nemotron-3-5-lightning-30b-nvfp4 | default | 2026-10-22 | [2026-10-22_default.html](nemotron-3-5-lightning-30b-nvfp4/2026-10-22_default.html) | **-2** | −😱👻 | 💻 🔧 |
 | muse-glimmer-30b-nvfp4 | default | 2026-10-22 | [2026-10-22_default.html](muse-glimmer-30b-nvfp4/2026-10-22_default.html) | **-1** | +🦵🚶 −😱👻🚪 | 💻 |
 | gemma4-12b-q4km | default | 2026-10-22 | [2026-10-22_default.html](gemma4-12b-q4km/2026-10-22_default.html) | **-1** | +🦵 −😱🚪 | 💻 |
 | qwen3-8-27b-nvfp4 | default | 2026-10-22 | [2026-10-22_default.html](qwen3-8-27b-nvfp4/2026-10-22_default.html) | **+0** | +🦵🦒 −😱👻 | 💻 |
 | ornith-1-5-9b-q4km | default | 2026-10-22 | [2026-10-22_default.html](ornith-1-5-9b-q4km/2026-10-22_default.html) | **+1** | +🦵🦒🌅 −😱👻 | 💻 |
 
-**Giraffe Points (GP)** = bonuses − penalties. Bonuses: 🦵 four legs · 🚶 actually walks · 🦒 giraffe-shaped · 🌅 real savannah. Penalties: 😱 nightmare fuel · 👻 ghost giraffe · 🚪 wanders off.
+**Giraffe Points (GP)** = bonuses − penalties. Bonuses: 🦵 four legs · 🚶 actually walks · 🤸 legs flex · 🦴 proper hocks · 🦒 giraffe-shaped · 🌅 real savannah. Penalties: 😱 nightmare fuel · 🔄 backwards front legs · 👻 ghost giraffe · 🚪 wanders off.
 
 💻 **Local run.** MacBook Pro (Apple M2 Pro, 32 GB) through Cherry Studio → Ollama 0.40.4. Effort is Cherry's thinking setting; the level Ollama actually ran is a best guess from each model's default.
 
