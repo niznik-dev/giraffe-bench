@@ -1,16 +1,31 @@
 # giraffe-bench 🦒
 
-A herd of single-page three.js sites, each one an LLM's answer to the same prompt.
-Every file is self-contained: open it in a browser and watch the legs (hopefully) move.
-
-## Prompt
+A herd of single-page three.js sites, each one an LLM's answer to the same prompt:
 
 > Please create an animation of a giraffe walking through a savannah environment using Three.js
 
-Every entry uses this exact prompt. If the wording ever changes, record the new version here
-and note which entries used it.
+**🌍 Live gallery: <https://niznik-dev.github.io/giraffe-bench/>.** Click any page below to watch the
+giraffe (hopefully) walk.
 
-## Layout
+## Gallery
+
+| Model | Effort | Date | Page | Notes |
+|-------|--------|------|------|-------|
+| claude-opus-5-5 | medium | 2026-10-22 | [2026-10-22_medium.html](claude-opus-5-5/2026-10-22_medium.html) | |
+| claude-sonnet-5-5 | medium | 2026-10-22 | [2026-10-22_medium.html](claude-sonnet-5-5/2026-10-22_medium.html) | |
+| claude-haiku-5-5 | medium | 2026-10-22 | [2026-10-22_medium.html](claude-haiku-5-5/2026-10-22_medium.html) | |
+| chatgpt-sol-6-1 | xhigh | 2026-10-22 | [2026-10-22_xhigh.html](chatgpt-sol-6-1/2026-10-22_xhigh.html) | First reply wasn't obviously an HTML file. Asked *"Is this an HTML file I can download?"* and received a viewer-wrapped HTML file ([original](chatgpt-sol-6-1/2026-10-22_xhigh.wrapper.html)); the giraffe page was recovered from inside it. |
+| chatgpt-sol-6-1 | medium | 2026-10-22 | [2026-10-22_medium.html](chatgpt-sol-6-1/2026-10-22_medium.html) | First reply wasn't obviously an HTML file. Asked *"Is this an HTML file I can download?"* and received a viewer-wrapped HTML file ([original](chatgpt-sol-6-1/2026-10-22_medium.wrapper.html)); the giraffe page was recovered from inside it. |
+
+## Contributing
+
+Every entry uses the exact prompt above. If the wording ever changes, record the new version here
+and note which entries used it. Pages should stay single-file: inline JS/CSS, with three.js loaded
+from a pinned CDN URL. Anything that differs from a clean one-shot run (follow-up prompts,
+extraction) goes in the gallery's Notes column.
+
+<details markdown="1">
+<summary><b>Layout</b></summary>
 
 ```
 <model-slug>/
@@ -24,7 +39,10 @@ qwen3-27b-q4km/
   2026-09-30.html            # local model: quant in folder, no effort suffix
 ```
 
-## Naming rules
+</details>
+
+<details markdown="1">
+<summary><b>Naming rules</b></summary>
 
 | Part | Rule | Example |
 |------|------|---------|
@@ -35,15 +53,4 @@ qwen3-27b-q4km/
 | `-n` suffix | Only for duplicates with the same model, day, and effort, starting at `-2` | `2026-10-22_medium-2.html` |
 | `.wrapper` | The original, unedited file, when the entry had to be extracted from a vendor wrapper | `2026-10-22_xhigh.wrapper.html` |
 
-Pages should stay single-file: inline JS/CSS, with three.js loaded from a pinned CDN URL.
-Anything that differs from a clean one-shot run (follow-up prompts, extraction) goes in the gallery's Notes column.
-
-## Gallery
-
-| Model | Effort | Date | Page | Notes |
-|-------|--------|------|------|-------|
-| claude-opus-5-5 | medium | 2026-10-22 | [2026-10-22_medium.html](claude-opus-5-5/2026-10-22_medium.html) | |
-| claude-sonnet-5-5 | medium | 2026-10-22 | [2026-10-22_medium.html](claude-sonnet-5-5/2026-10-22_medium.html) | |
-| claude-haiku-5-5 | medium | 2026-10-22 | [2026-10-22_medium.html](claude-haiku-5-5/2026-10-22_medium.html) | |
-| chatgpt-sol-6-1 | xhigh | 2026-10-22 | [2026-10-22_xhigh.html](chatgpt-sol-6-1/2026-10-22_xhigh.html) | First reply wasn't obviously an HTML file. Asked *"Is this an HTML file I can download?"* and received a viewer-wrapped HTML file ([original](chatgpt-sol-6-1/2026-10-22_xhigh.wrapper.html)); the giraffe page was recovered from inside it. |
-| chatgpt-sol-6-1 | medium | 2026-10-22 | [2026-10-22_medium.html](chatgpt-sol-6-1/2026-10-22_medium.html) | First reply wasn't obviously an HTML file. Asked *"Is this an HTML file I can download?"* and received a viewer-wrapped HTML file ([original](chatgpt-sol-6-1/2026-10-22_medium.wrapper.html)); the giraffe page was recovered from inside it. |
+</details>
