@@ -23,7 +23,11 @@ for the original idea of testing models on 3D creation.
 | claude-haiku-5-5 | medium | 2026-10-22 | [2026-10-22_medium.html](claude-haiku-5-5/2026-10-22_medium.html) | **+3** | +🦵🚶🌅 |  |
 | chatgpt-sol-6-1 | xhigh | 2026-10-22 | [2026-10-22_xhigh.html](chatgpt-sol-6-1/2026-10-22_xhigh.html) | **+4** | +🦵🚶🦒🌅 | 😵‍💫 |
 | chatgpt-sol-6-1 | medium | 2026-10-22 | [2026-10-22_medium.html](chatgpt-sol-6-1/2026-10-22_medium.html) | **+3** | +🦵🚶🦒🌅 −👻 | 😵‍💫 |
-| nemotron-3-5-lightning-30b-nvfp4 | default | 2026-10-22 | [2026-10-22_default.html](nemotron-3-5-lightning-30b-nvfp4/2026-10-22_default.html) | **-2** | −😱👻 | 💻 |
+| gemini-4-argon | medium | 2026-10-22 | [2026-10-22_medium.html](gemini-4-argon/2026-10-22_medium.html) | **+4** | +🦵🚶🦒🌅 |  |
+| gemini-4-argon | high | 2026-10-22 | [2026-10-22_high.html](gemini-4-argon/2026-10-22_high.html) | **+4** | +🦵🚶🦒🌅 |  |
+| gemini-3-5-flash-lite | medium | 2026-10-22 | [2026-10-22_medium.html](gemini-3-5-flash-lite/2026-10-22_medium.html) | **-1** | +🦵 −😱👻 |  |
+| gemini-3-8-flash | medium | 2026-10-22 | [2026-10-22_medium.html](gemini-3-8-flash/2026-10-22_medium.html) | **+2** | +🦵🦒🌅 −😱 |  |
+| nemotron-3-5-lightning-30b-nvfp4 | default | 2026-10-22 | [2026-10-22_default.html](nemotron-3-5-lightning-30b-nvfp4/2026-10-22_default.html) | **-2** | −😱👻 | 💻 🔧 |
 | muse-glimmer-30b-nvfp4 | default | 2026-10-22 | [2026-10-22_default.html](muse-glimmer-30b-nvfp4/2026-10-22_default.html) | **-1** | +🦵🚶 −😱👻🚪 | 💻 |
 | gemma4-12b-q4km | default | 2026-10-22 | [2026-10-22_default.html](gemma4-12b-q4km/2026-10-22_default.html) | **-1** | +🦵 −😱🚪 | 💻 |
 | qwen3-8-27b-nvfp4 | default | 2026-10-22 | [2026-10-22_default.html](qwen3-8-27b-nvfp4/2026-10-22_default.html) | **+0** | +🦵🦒 −😱👻 | 💻 |
@@ -44,7 +48,17 @@ for the original idea of testing models on 3D creation.
 😵‍💫 **ChatGPT detour.** The first reply wasn't obviously an HTML file. Asked "Is this an HTML file I can download?" and received a viewer-wrapped HTML file; the giraffe page was recovered from inside it.
 Originals: [chatgpt-sol-6-1 xhigh](chatgpt-sol-6-1/2026-10-22_xhigh.wrapper.html) · [chatgpt-sol-6-1 medium](chatgpt-sol-6-1/2026-10-22_medium.wrapper.html).
 
-🥚 **Incubating:** Qwen 3.5 9B (`qwen3.5:9b-mlx`) · Qwen 3.5 0.8B (`qwen3.5:0.8b`) · SmolLM2 360M (`smollm2:360m`).
+🔧 **Fix-it nudge.** The first file had an error. One follow-up, "Audit the file - there seems to be an error", got a working version; the page shown is the fixed one.
+
+| Model | Ollama tag | Likely thinking level |
+|-------|------------|-----------------------|
+| nemotron-3-5-lightning-30b-nvfp4 | `nemotron-3.5-lightning:30b-mlx` | `true` (unverified) |
+
+🪦 **Graveyard: Qwen 3.5 9B** (`qwen3.5:9b-mlx`). Spent three rounds of "Audit the file - there seems to be an error" assuring us the savannah was loading. The savannah is still loading.
+
+🪦 **Graveyard: Qwen 3.5 0.8B** (`qwen3.5:0.8b`). Every audit uncovered critical problems with its import statements. Every fix uncovered new critical problems with its import statements.
+
+🪦 **Graveyard: SmolLM2 360M** (`smollm2:360m`). Refused to write HTML. Its JavaScript imported 16 modules (most of which don't exist), placed one box, then wrote the same zoom handler 19 times. No giraffe was harmed, because none was made.
 <!-- gallery:end -->
 
 ## Contributing

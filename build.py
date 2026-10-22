@@ -78,7 +78,11 @@ def load_entries():
     hatched = {e["slug"] for e in entries}
     if dupes := [p["slug"] for p in pending if p["slug"] in hatched]:
         raise SystemExit(f"pending entries already have giraffes; remove them from 'pending': {dupes}")
-    return meta["flags"], entries, pending
+    failed = meta.get("failed", [])
+    taken = hatched | {p["slug"] for p in pending}
+    if clash := [f["slug"] for f in failed if f["slug"] in taken]:
+        raise SystemExit(f"failed entries also appear in the herd or as eggs: {clash}")
+    return meta["flags"], entries, pending, failed
 
 
 # ---------- README ----------
@@ -94,7 +98,7 @@ def fmt_gp(e):
     return "?" if (score := gp(e)) is None else f"{score:+d}"
 
 
-def readme_gallery(flags, entries, pending):
+def readme_gallery(flags, entries, pending, failed):
     lines = ["| Model | Effort | Date | Page | GP | Vibe check | ⚑ |", "|-------|--------|------|------|----|------------|---|"]
     for e in entries:
         name = Path(e["path"]).name
@@ -118,19 +122,21 @@ def readme_gallery(flags, entries, pending):
         wrapped = [e for e in flagged if e["wrapper"]]
         if wrapped:
             lines += ["Originals: " + " · ".join(f"[{e['slug']} {e['effort']}]({e['wrapper']})" for e in wrapped) + "."]
+    for f in failed:
+        lines += ["", f"🪦 **Graveyard: {f['label']}** (`{f['tag']}`). {f['epitaph']}"]
     if pending:
         lines += ["", "🥚 **Incubating:** " + " · ".join(f"{p['label']} (`{p['tag']}`)" for p in pending) + "."]
     return "\n".join(lines)
 
 
-def write_readme(flags, entries, pending):
+def write_readme(flags, entries, pending, failed):
     readme = ROOT / "README.md"
     text = readme.read_text()
     if README_START not in text:
         raise SystemExit(f"README.md needs {README_START} / {README_END} markers around the gallery")
     head, rest = text.split(README_START, 1)
     _, tail = rest.split(README_END, 1)
-    readme.write_text(f"{head}{README_START}\n{readme_gallery(flags, entries, pending)}\n{README_END}{tail}")
+    readme.write_text(f"{head}{README_START}\n{readme_gallery(flags, entries, pending, failed)}\n{README_END}{tail}")
 
 
 # ---------- index.html ----------
@@ -150,6 +156,7 @@ def lessons(entries):
     small = min(entries, key=lambda e: e["size_kb"])
     big = max(entries, key=lambda e: e["size_kb"])
     detours = sum("😵‍💫" in e["flags"] for e in entries)
+    fixes = sum("🔧" in e["flags"] for e in entries)
     judged = [e for e in entries if e["vibes"]]
     if judged:
         vibe_items = "".join(
@@ -175,14 +182,15 @@ def lessons(entries):
         Biggest: <b>{esc(big['label'])}</b> at {big['size_kb']} KB.</p>
         <p class="aside">Bytes are not legs. Size measures ambition, not gait.</p></div>
       <div class="lesson"><span class="big">🧭</span><h3>Getting a file at all</h3>
-        <p><b>{detours}</b> of {len(entries)} giraffes needed a follow-up prompt before an HTML file appeared.
+        <p><b>{detours + fixes}</b> of {len(entries)} giraffes needed a follow-up prompt: {detours} 😵‍💫 to get a file at all,
+        {fixes} 🔧 to fix a broken one.
         <b>{local}</b> ran on a laptop.</p>
         <p class="aside">The app around a model shapes the result as much as the model does.</p></div>
       <div class="lesson"><span class="big">🔍</span><h3>Vibe check</h3>{vibe_body}</div>
     </div>"""
 
 
-def card(e, flags):
+def card(e, flags, order):
     page = esc(e["path"])
     title = esc(e["label"])
     flag_html = "".join(
@@ -227,7 +235,7 @@ def card(e, flags):
     if e["wrapper"]:
         links.append(f'<a href="{esc(e["wrapper"])}" target="_blank" rel="noopener">🎁 as delivered</a>')
     return f"""
-      <article class="card">
+      <article class="card" data-order="{order}" data-gp="{'' if score is None else score}" data-size="{e['size_kb']}" data-name="{title}">
         {stage}
         <div class="body">
           <h3>{title} <span class="flags">{flag_html}</span></h3>
@@ -299,6 +307,33 @@ WALKER_SCRIPT = """
 """
 
 
+SORT_SCRIPT = """
+// Re-order cards in place; eggs stay last, ties fall back to the built (most-cursed) order.
+(() => {
+  const grid = document.querySelector('.grid'), buttons = document.querySelectorAll('.sorter button');
+  const num = (el, k, missing) => el.dataset[k] ? Number(el.dataset[k]) : missing;
+  const keys = {
+    cursed: () => 0,
+    best: (a, b) => num(b, 'gp', -Infinity) - num(a, 'gp', -Infinity),
+    size: (a, b) => num(b, 'size', 0) - num(a, 'size', 0),
+    name: (a, b) => a.dataset.name.localeCompare(b.dataset.name),
+  };
+  const apply = mode => {
+    const cards = [...grid.children];
+    const eggs = cards.filter(c => 'egg' in c.dataset), herd = cards.filter(c => !('egg' in c.dataset));
+    herd.sort((a, b) => keys[mode](a, b) || num(a, 'order', 0) - num(b, 'order', 0));
+    grid.append(...herd, ...eggs);
+    buttons.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.sort === mode)));
+  };
+  buttons.forEach(b => b.addEventListener('click', () => {
+    apply(b.dataset.sort);
+    try { localStorage.setItem('giraffe-sort', b.dataset.sort); } catch (e) {}
+  }));
+  try { const saved = localStorage.getItem('giraffe-sort'); if (saved in keys) apply(saved); } catch (e) {}
+})();
+"""
+
+
 SCRIPT = """
 document.querySelectorAll('.stage[data-src]').forEach(stage => {
   const idle = stage.innerHTML;
@@ -341,7 +376,7 @@ def stars_shadow(n=70, seed=7):
 
 def egg_card(p):
     return f"""
-      <article class="card egg">
+      <article class="card egg" data-egg>
         <div class="stage nest"><span class="emoji">🥚</span><span>incubating…</span></div>
         <div class="body">
           <h3>{esc(p['label'])}</h3>
@@ -351,8 +386,27 @@ def egg_card(p):
       </article>"""
 
 
-def render_index(flags, entries, pending):
-    cards = "".join(card(e, flags) for e in entries)
+def grave_card(f):
+    return f"""
+      <article class="card grave">
+        <div class="stage tomb"><span class="emoji">🪦</span><span>no giraffe survived</span></div>
+        <div class="body">
+          <h3>{esc(f['label'])}</h3>
+          <div class="chips"><span class="chip">💻 local</span><span class="chip">🏷️ {esc(f['tag'])}</span></div>
+          <p class="epitaph">{esc(f['epitaph'])}</p>
+        </div>
+      </article>"""
+
+
+def render_index(flags, entries, pending, failed):
+    graveyard = ""
+    if failed:
+        graveyard = ('<h2 class="section graveyard-head">🪦 Giraffe graveyard</h2>\n'
+                     '  <p class="aside">Models that never produced a working giraffe. Gone, but not forgotten.</p>\n'
+                     f'  <div class="grid">{"".join(grave_card(f) for f in failed)}\n  </div>')
+    # Server-side order is "most cursed": lowest GP first, unscored last, ties by name.
+    cursed = sorted(entries, key=lambda e: (gp(e) is None, gp(e) or 0, e["label"], e["effort"]))
+    cards = "".join(card(e, flags, i) for i, e in enumerate(cursed))
     models = len({e["slug"] for e in entries})
     legend = "".join(
         f'<li><span class="flag">{f}</span> <b>{esc(v["title"])}.</b> {esc(v["text"])}</li>' for f, v in flags.items()
@@ -420,6 +474,13 @@ h1 a.wiki:hover, .stats a.wiki:hover {{ transform: rotate(-12deg) scale(1.15); }
 .lesson .big {{ font-size: 1.8rem; }}
 .aside {{ color: var(--muted); font-size: .92rem; font-style: italic; }}
 h2.section {{ font-size: 1.8rem; margin: 8px 0 14px; }}
+.herd-head {{ display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px; }}
+.sorter {{ display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 14px; }}
+.sort-label {{ color: var(--muted); font-weight: 700; font-size: .9rem; }}
+.sorter button {{ font: 700 .88rem Nunito, sans-serif; color: var(--ink); background: var(--chip); border: 2px solid transparent;
+  border-radius: 999px; padding: 4px 12px; cursor: pointer; }}
+.sorter button:hover {{ border-color: var(--line); }}
+.sorter button[aria-pressed="true"] {{ background: var(--accent); color: var(--accent-ink); }}
 .grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }}
 .card {{ background: var(--card); border: 1px solid var(--line); border-radius: 18px; overflow: hidden;
   display: flex; flex-direction: column; transition: transform .15s, box-shadow .15s; }}
@@ -444,9 +505,16 @@ h2.section {{ font-size: 1.8rem; margin: 8px 0 14px; }}
 .meta {{ display: flex; justify-content: space-between; align-items: center; }}
 .gp {{ font: 700 1.05rem Fredoka, sans-serif; padding: 2px 12px; border-radius: 999px; background: var(--chip); color: var(--ink); }}
 .gp.pos {{ background: #2f9e55; color: #fff; }} .gp.neg {{ background: #c2475e; color: #fff; }}
+.graveyard-head {{ margin-top: 40px; }}
+.grave {{ filter: grayscale(.85); opacity: .8; }}
+.grave:hover {{ transform: none; box-shadow: none; filter: grayscale(.4); }}
+.tomb {{ display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 4px; font: 600 1rem Fredoka, sans-serif;
+  background: linear-gradient(180deg, #3d3a4a, #22202b); color: #ddd; }}
+.tomb .emoji {{ font-size: 2.8rem; }}
+.epitaph {{ margin: 0; font-style: italic; color: var(--muted); font-size: .92rem; }}
 .egg {{ opacity: .75; border-style: dashed; }}
 .egg:hover {{ transform: none; box-shadow: none; }}
-.nest {{ flex-direction: column; gap: 4px; font: 600 1rem Fredoka, sans-serif; }}
+.nest {{ display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 4px; font: 600 1rem Fredoka, sans-serif; }}
 .nest .emoji {{ font-size: 2.8rem; display: inline-block; animation: wobble 2.4s ease-in-out infinite; }}
 @keyframes wobble {{ 0%, 70%, 100% {{ transform: rotate(0); }} 76% {{ transform: rotate(-12deg); }} 84% {{ transform: rotate(10deg); }} 92% {{ transform: rotate(-5deg); }} }}
 @media (prefers-reduced-motion: reduce) {{ .nest .emoji {{ animation: none; }} }}
@@ -496,13 +564,24 @@ footer {{ border-top: 1px solid var(--line); margin-top: 40px; padding: 24px 0 4
       <li><a class="wiki" href="{WIKI_GIRAFFE}" target="_blank" rel="noopener" title="Meet a real giraffe (Wikipedia)">🦒</a> {len(entries)} giraffes</li><li>🧬 {models} models</li>
       <li>☁️ {sum(e['where'] == 'hosted' for e in entries)} hosted</li>
       <li>💻 {sum(e['where'] == 'local' for e in entries)} local</li>
+      {f"<li>🪦 {len(failed)} lost</li>" if failed else ""}
     </ul>
   </section>
   {lessons(entries)}
 
-  <h2 class="section">The herd</h2>
+  <div class="herd-head">
+    <h2 class="section">The herd</h2>
+    <div class="sorter" role="group" aria-label="Sort the herd">
+      <span class="sort-label">Sort:</span>
+      <button type="button" data-sort="cursed" aria-pressed="true">😱 Most cursed</button>
+      <button type="button" data-sort="best" aria-pressed="false">🏆 Best</button>
+      <button type="button" data-sort="size" aria-pressed="false">📏 Size</button>
+      <button type="button" data-sort="name" aria-pressed="false">🔤 Name</button>
+    </div>
+  </div>
   <div class="grid">{cards}{"".join(egg_card(p) for p in pending)}
   </div>
+  {graveyard}
 
   <ul class="legend">{legend}</ul>
 </main>
@@ -517,7 +596,7 @@ footer {{ border-top: 1px solid var(--line); margin-top: 40px; padding: 24px 0 4
     <p>Pages are model output, shown as delivered and sandboxed. 🐙 <a href="{REPO_URL}">Source, naming rules &amp; how to add a giraffe</a></p>
   </div>
 </footer>
-<script>{THEME_SCRIPT}{WALKER_SCRIPT}{SCRIPT}
+<script>{THEME_SCRIPT}{WALKER_SCRIPT}{SORT_SCRIPT}{SCRIPT}
 </script>
 </body>
 </html>
@@ -530,11 +609,11 @@ def main():
     ap.add_argument("--no-readme", action="store_true")
     args = ap.parse_args()
 
-    flags, entries, pending = load_entries()
-    (ROOT / args.out).write_text(render_index(flags, entries, pending))
-    print(f"wrote {args.out} ({len(entries)} entries, {len(pending)} incubating)")
+    flags, entries, pending, failed = load_entries()
+    (ROOT / args.out).write_text(render_index(flags, entries, pending, failed))
+    print(f"wrote {args.out} ({len(entries)} entries, {len(pending)} incubating, {len(failed)} lost)")
     if not args.no_readme:
-        write_readme(flags, entries, pending)
+        write_readme(flags, entries, pending, failed)
         print("updated README.md gallery")
 
 

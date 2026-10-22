@@ -7,6 +7,10 @@
     "😵‍💫": {
       "title": "ChatGPT detour",
       "text": "The first reply wasn't obviously an HTML file. Asked \"Is this an HTML file I can download?\" and received a viewer-wrapped HTML file; the giraffe page was recovered from inside it."
+    },
+    "🔧": {
+      "title": "Fix-it nudge",
+      "text": "The first file had an error. One follow-up, \"Audit the file - there seems to be an error\", got a working version; the page shown is the fixed one."
     }
   },
   "entries": {
@@ -85,7 +89,8 @@
       "label": "Nemotron 3.5 Lightning 30B",
       "where": "local",
       "flags": [
-        "💻"
+        "💻",
+        "🔧"
       ],
       "tag": "nemotron-3.5-lightning:30b-mlx",
       "thinking_guess": "true",
@@ -170,23 +175,79 @@
         "ghost": "yes",
         "wanders": "no"
       }
+    },
+    "gemini-4-argon/2026-10-22_medium.html": {
+      "label": "Gemini 4 Argon",
+      "where": "hosted",
+      "vibes": {
+        "legs": "yes",
+        "walks": "yes",
+        "giraffe": "yes",
+        "savannah": "yes",
+        "nightmare": "no",
+        "ghost": "no",
+        "wanders": "no"
+      }
+    },
+    "gemini-4-argon/2026-10-22_high.html": {
+      "label": "Gemini 4 Argon",
+      "where": "hosted",
+      "vibes": {
+        "legs": "yes",
+        "walks": "yes",
+        "giraffe": "yes",
+        "savannah": "yes",
+        "nightmare": "no",
+        "ghost": "no",
+        "wanders": "no"
+      }
+    },
+    "gemini-3-5-flash-lite/2026-10-22_medium.html": {
+      "label": "Gemini 3.5 Flash-Lite",
+      "where": "hosted",
+      "vibes": {
+        "legs": "yes",
+        "walks": "no",
+        "giraffe": "no",
+        "savannah": "no",
+        "nightmare": "yes",
+        "ghost": "yes",
+        "wanders": "no"
+      }
+    },
+    "gemini-3-8-flash/2026-10-22_medium.html": {
+      "label": "Gemini 3.8 Flash",
+      "where": "hosted",
+      "vibes": {
+        "legs": "yes",
+        "walks": "no",
+        "giraffe": "yes",
+        "savannah": "yes",
+        "nightmare": "yes",
+        "ghost": "no",
+        "wanders": "no"
+      }
     }
   },
-  "pending": [
+  "pending": [],
+  "failed": [
     {
       "slug": "qwen3-5-9b-nvfp4",
       "label": "Qwen 3.5 9B",
-      "tag": "qwen3.5:9b-mlx"
+      "tag": "qwen3.5:9b-mlx",
+      "epitaph": "Spent three rounds of \"Audit the file - there seems to be an error\" assuring us the savannah was loading. The savannah is still loading."
     },
     {
       "slug": "qwen3-5-0-8b-q80",
       "label": "Qwen 3.5 0.8B",
-      "tag": "qwen3.5:0.8b"
+      "tag": "qwen3.5:0.8b",
+      "epitaph": "Every audit uncovered critical problems with its import statements. Every fix uncovered new critical problems with its import statements."
     },
     {
       "slug": "smollm2-360m-f16",
       "label": "SmolLM2 360M",
-      "tag": "smollm2:360m"
+      "tag": "smollm2:360m",
+      "epitaph": "Refused to write HTML. Its JavaScript imported 16 modules (most of which don't exist), placed one box, then wrote the same zoom handler 19 times. No giraffe was harmed, because none was made."
     }
   ]
 }
