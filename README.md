@@ -40,3 +40,4 @@ Pages should stay single-file: inline JS/CSS, with three.js loaded from a pinned
 | Model | Effort | Date | Page |
 |-------|--------|------|------|
 | claude-opus-5-5 | medium | 2026-10-22 | [2026-10-22_medium.html](claude-opus-5-5/2026-10-22_medium.html) |
+| claude-sonnet-5-5 | medium | 2026-10-22 | [2026-10-22_medium.html](claude-sonnet-5-5/2026-10-22_medium.html) |
