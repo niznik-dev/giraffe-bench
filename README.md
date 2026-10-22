@@ -25,6 +25,7 @@ for the original idea of testing models on 3D creation.
 | nemotron-3-5-lightning-30b-nvfp4 | default | 2026-10-22 | [2026-10-22_default.html](nemotron-3-5-lightning-30b-nvfp4/2026-10-22_default.html) | 💻 |
 | muse-glimmer-30b-nvfp4 | default | 2026-10-22 | [2026-10-22_default.html](muse-glimmer-30b-nvfp4/2026-10-22_default.html) | 💻 |
 | gemma4-12b-q4km | default | 2026-10-22 | [2026-10-22_default.html](gemma4-12b-q4km/2026-10-22_default.html) | 💻 |
+| qwen3-8-27b-nvfp4 | default | 2026-10-22 | [2026-10-22_default.html](qwen3-8-27b-nvfp4/2026-10-22_default.html) | 💻 |
 
 💻 **Local run.** MacBook Pro (Apple M2 Pro, 32 GB) through Cherry Studio → Ollama 0.40.4. Effort is
 Cherry's thinking setting; the level Ollama actually ran is a best guess from each model's default.
@@ -34,6 +35,7 @@ Cherry's thinking setting; the level Ollama actually ran is a best guess from ea
 | nemotron-3-5-lightning-30b-nvfp4 | `nemotron-3.5-lightning:30b-mlx` | `true` (unverified) |
 | muse-glimmer-30b-nvfp4 | `muse-glimmer:30b-mlx` | `high` (unverified) |
 | gemma4-12b-q4km | `gemma4:12b` | `true` (unverified) |
+| qwen3-8-27b-nvfp4 | `qwen3.8:27b-mlx` | `medium` (unverified) |
 
 😵‍💫 **ChatGPT detour.** The first reply wasn't obviously an HTML file. Asked *"Is this an HTML file I
 can download?"* and received a viewer-wrapped HTML file; the giraffe page was recovered from inside it.
