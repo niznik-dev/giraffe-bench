@@ -32,6 +32,7 @@ for the original idea of testing models on 3D creation.
 | gemma4-12b-q4km | default | 2026-10-22 | [2026-10-22_default.html](gemma4-12b-q4km/2026-10-22_default.html) | **-1** | +🦵 −😱🚪 | 💻 |
 | qwen3-8-27b-nvfp4 | default | 2026-10-22 | [2026-10-22_default.html](qwen3-8-27b-nvfp4/2026-10-22_default.html) | **+0** | +🦵🦒 −😱👻 | 💻 |
 | ornith-1-5-9b-q4km | default | 2026-10-22 | [2026-10-22_default.html](ornith-1-5-9b-q4km/2026-10-22_default.html) | **+1** | +🦵🦒🌅 −😱👻 | 💻 |
+| qwen3-8-27b-udq4kxl | default | 2026-10-23 | [2026-10-23_default.html](qwen3-8-27b-udq4kxl/2026-10-23_default.html) | **+5** | +🦵🚶🤸🦒🌅 | 🦙 ⏳ |
 
 🎖️ **Curator's whim:** 🥇🥈🥉 medals are awarded entirely on the curator's whim, independent of Giraffe Points.
 
@@ -55,6 +56,10 @@ Originals: [chatgpt-sol-6-1 xhigh](chatgpt-sol-6-1/2026-10-22_xhigh.wrapper.html
 | Model | Ollama tag | Likely thinking level |
 |-------|------------|-----------------------|
 | nemotron-3-5-lightning-30b-nvfp4 | `nemotron-3.5-lightning:30b-mlx` | `true` (unverified) |
+
+🦙 **llama-server run.** Same MacBook Pro (Apple M2 Pro, 32 GB), but Cherry Studio → llama.cpp's llama-server instead of Ollama, loading qwen3.8-27b-ud-q4kxl.gguf (Unsloth UD-Q4_K_XL). Effort is Cherry's thinking setting.
+
+⏳ **The Long Walk.** Took about 3 hours to finish with llama-server's out-of-the-box settings, no tuning. The page titled itself "The Long Walk", which is fair.
 
 🪦 **Graveyard: Qwen 3.5 9B** (`qwen3.5:9b-mlx`). Spent three rounds of "Audit the file - there seems to be an error" assuring us the savannah was loading. The savannah is still loading.
 

@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Long Walk — a giraffe in the savanna</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,700;1,9..144,500&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#fff3dd; --cream-dim:rgba(255,231,196,.66); --amber:#f2a94e;
+    --panel:rgba(28,15,7,.62); --line:rgba(255,214,150,.34);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;overflow:hidden;background:#160d06;color:var(--cream);
+       font-family:'Instrument Sans',system-ui,sans-serif}
+  #scene{position:fixed;inset:0;width:100%;height:100%;display:block}
+  .hud{position:fixed;z-index:20;pointer-events:none}
+
+  .brand{top:28px;left:32px;max-width:min(480px,72vw);padding:6px 28px 14px 0;
+         background:linear-gradient(100deg,rgba(24,12,5,.5),rgba(24,12,5,0) 85%)}
+  .eyebrow{margin:0;font-family:'IBM Plex Mono',monospace;font-size:10.5px;
+           letter-spacing:.26em;text-transform:uppercase;color:var(--cream-dim);
+           display:flex;align-items:center;gap:10px}
+  .eyebrow::before{content:'';width:26px;height:1px;background:var(--amber)}
+  h1{margin:.35em 0 .25em;font-family:'Fraunces',serif;font-weight:700;
+     font-size:clamp(2.1rem,4.6vw,3.7rem);line-height:.95;letter-spacing:-.01em;
+     text-shadow:0 2px 30px rgba(30,12,2,.5)}
+  h1 em{font-style:italic;font-weight:500;color:#ffd99c}
+  .species{margin:0;font-size:13px;color:var(--cream-dim);letter-spacing:.02em}
+  .species i{color:#ffe6b8}
+
+  .readout{top:30px;right:32px;text-align:right;font-family:'IBM Plex Mono',monospace;
+           font-size:11.5px;line-height:2.05;color:#ffeccb;text-shadow:0 1px 12px rgba(25,10,2,.55)}
+  .readout .lbl{color:var(--cream-dim);margin-right:10px;font-size:10px;
+                letter-spacing:.18em;text-transform:uppercase}
+  .readout #ro-gait{color:#ffcf8a;font-weight:500}
+
+  .hints{bottom:26px;left:32px;display:flex;gap:18px;font-family:'IBM Plex Mono',monospace;
+         font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--cream-dim)}
+  kbd{font:inherit;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;
+      padding:2px 7px;color:#ffe3b0;background:rgba(40,20,8,.35);margin-right:6px}
+
+  .controls{bottom:24px;right:32px;display:flex;gap:10px;pointer-events:auto}
+  .btn{pointer-events:auto;display:inline-flex;align-items:center;gap:9px;cursor:pointer;
+       font-family:'Instrument Sans',sans-serif;font-weight:600;font-size:13px;letter-spacing:.03em;
+       color:#ffe9c4;background:var(--panel);border:1px solid var(--line);border-radius:999px;
+       padding:11px 18px;
+       transition:transform .16s ease,background .16s ease,color .16s ease,box-shadow .16s ease,border-color .16s ease}
+  .btn:hover{background:var(--amber);color:#221106;border-color:var(--amber);
+             transform:translateY(-2px);box-shadow:0 10px 26px rgba(242,169,78,.28)}
+  .btn:active{transform:translateY(0) scale(.97)}
+  .btn:focus-visible{outline:2px solid var(--amber);outline-offset:3px}
+  .btn[aria-pressed="true"]{background:var(--amber);color:#221106;border-color:var(--amber)}
+  .dot{width:7px;height:7px;border-radius:50%;background:rgba(255,220,160,.35);transition:all .16s}
+  .btn[aria-pressed="true"] .dot{background:#221106;box-shadow:0 0 0 3px rgba(34,17,6,.2)}
+
+  .vignette{position:fixed;inset:0;z-index:15;pointer-events:none;
+            background:radial-gradient(ellipse at 50% 42%,transparent 52%,rgba(24,10,2,.38) 100%)}
+  .grain{position:fixed;inset:0;z-index:40;pointer-events:none;opacity:.05;mix-blend-mode:overlay;
+         background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>")}
+
+  .intro{position:fixed;inset:0;z-index:50;background:#150b04;display:flex;flex-direction:column;
+         align-items:center;justify-content:center;gap:12px;text-align:center;
+         transition:opacity 1.1s ease,visibility 1.1s}
+  .intro.gone{opacity:0;visibility:hidden}
+  .intro-eyebrow{margin:0;font-family:'IBM Plex Mono',monospace;font-size:11px;
+                 letter-spacing:.34em;text-transform:uppercase;color:rgba(255,220,170,.6)}
+  .intro-title{margin:0;font-family:'Fraunces',serif;font-style:italic;font-weight:500;
+               font-size:clamp(3rem,9vw,6.5rem);color:#ffd89b;line-height:1}
+  .intro-sub{margin:0;font-size:13px;letter-spacing:.08em;color:rgba(255,230,190,.55)}
+
+  @media (max-width:720px){
+    .hints{display:none}
+    .brand{top:20px;left:20px}
+    .readout{top:20px;right:20px;font-size:10px;line-height:1.9}
+    .controls{right:20px;bottom:20px}
+  }
+</style>
+</head>
+<body>
+<canvas id="scene"></canvas>
+
+<header class="hud brand">
+  <p class="eyebrow">Field log · Serengeti Plain</p>
+  <h1>The <em>Long&nbsp;Walk</em></h1>
+  <p class="species"><i>Giraffa camelopardalis</i> — one resident, no script</p>
+</header>
+
+<div class="hud readout" aria-hidden="true">
+  <div><span class="lbl">Local</span><span id="ro-clock">06:41:00</span></div>
+  <div><span class="lbl">Grid</span><span id="ro-coord">2.3841° S · 34.8342° E</span></div>
+  <div><span class="lbl">Gait</span><span id="ro-gait">Walking</span></div>
+  <div><span class="lbl">Speed</span><span id="ro-speed">0.0 m/s</span></div>
+</div>
+
+<div class="hud hints">
+  <span><kbd>click</kbd>graze / rise</span>
+  <span><kbd>space</kbd>trot</span>
+  <span><kbd>c</kbd>camera</span>
+</div>
+
+<div class="hud controls">
+  <button class="btn" id="btn-gait" aria-pressed="false"><span class="dot"></span><span id="gait-label">Trot</span></button>
+  <button class="btn" id="btn-cam" aria-pressed="false">Free camera</button>
+  <button class="btn" id="btn-time" aria-pressed="false">Noon light</button>
+</div>
+
+<div class="vignette"></div>
+<div class="grain"></div>
+
+<div class="intro" id="intro">
+  <p class="intro-eyebrow">06:41 · first light</p>
+  <p class="intro-title">The Long Walk</p>
+  <p class="intro-sub">a savanna, one giraffe, zero scripts</p>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+
+/* ---------- helpers ---------- */
+const rand  = (a=1,b) => b===undefined ? Math.random()*a : a + Math.random()*(b-a);
+const lerp  = (a,b,t) => a+(b-a)*t;
+const clamp = (v,a,b) => Math.min(b, Math.max(a,v));
+
+function groundH(x,z){
+  return 1.1*Math.sin(x*0.042)*Math.cos(z*0.047)
+       + 0.45*Math.sin(x*0.113+1.7)*Math.sin(z*0.089+0.4);
+}
+
+/* ---------- renderer / scene / camera ---------- */
+const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('scene'), antialias:true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.12;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0xefc28b, 36, 235);
+
+const camera = new THREE.PerspectiveCamera(46, innerWidth/innerHeight, 0.1, 900);
+camera.position.set(5, 3.2, 8.5);
+
+/* ---------- sky ---------- */
+const skyMat = new THREE.ShaderMaterial({
+  side: THREE.BackSide, depthWrite: false, fog: false,
+  uniforms: {
+    topColor: { value: new THREE.Color('#6d9cc4') },
+    botColor: { value: new THREE.Color('#ffd291') },
+    sunDir:   { value: new THREE.Vector3(-0.62,0.26,-0.74).normalize() },
+    sunColor: { value: new THREE.Color('#ffe7b8') }
+  },
+  vertexShader: `
+    varying vec3 vW;
+    void main(){
+      vW = (modelMatrix * vec4(position,1.0)).xyz;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+    }`,
+  fragmentShader: `
+    uniform vec3 topColor; uniform vec3 botColor; uniform vec3 sunDir; uniform vec3 sunColor;
+    varying vec3 vW;
+    void main(){
+      vec3 d = normalize(vW);
+      float h = clamp(d.y, -0.05, 1.0);
+      vec3 col = mix(botColor, topColor, smoothstep(0.0, 0.55, h));
+      float s = max(dot(d, normalize(sunDir)), 0.0);
+      col += sunColor * (pow(s,320.0)*1.2 + pow(s,24.0)*0.35 + pow(s,4.0)*0.12);
+      gl_FragColor = vec4(col, 1.0);
+    }`
+});
+scene.add(new THREE.Mesh(new THREE.SphereGeometry(420, 32, 20), skyMat));
+
+/* ---------- canvas textures ---------- */
+function radialTex(stops){
+  const c = document.createElement('canvas'); c.width = c.height = 256;
+  const g = c.getContext('2d');
+  const gr = g.createRadialGradient(128,128,0,128,128,128);
+  for (const [o,col] of stops) gr.addColorStop(o,col);
+  g.fillStyle = gr; g.fillRect(0,0,256,256);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+function skinTexture(){
+  const c = document.createElement('canvas'); c.width = c.height = 512;
+  const g = c.getContext('2d');
+  g.fillStyle = '#e6b877'; g.fillRect(0,0,512,512);
+  for (let i=0;i<700;i++){
+    g.fillStyle = 'rgba(190,135,65,'+rand(0.02,0.06).toFixed(3)+')';
+    g.beginPath(); g.arc(rand(512),rand(512),rand(4,18),0,7); g.fill();
+  }
+  for (let i=0;i<46;i++){
+    const x=rand(512), y=rand(512), n=6+(Math.random()*4|0), r0=rand(16,42);
+    g.fillStyle = 'hsl('+rand(22,32).toFixed(0)+','+rand(42,58).toFixed(0)+'%,'+rand(24,36).toFixed(0)+'%)';
+    g.beginPath();
+    for (let k=0;k<=n;k++){
+      const a=(k/n)*Math.PI*2, r=r0*rand(0.65,1.45);
+      const px=x+Math.cos(a)*r, py=y+Math.sin(a)*r;
+      k ? g.lineTo(px,py) : g.moveTo(px,py);
+    }
+    g.closePath(); g.fill();
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  return t;
+}
+function grassTexture(){
+  const c = document.createElement('canvas'); c.width = c.height = 128;
+  const g = c.getContext('2d');
+  g.lineCap = 'round';
+  const pal = ['#c59a4d','#a97f3d','#8f7a3a','#d8b266','#7f8a46','#b98c42'];
+  for (let i=0;i<18;i++){
+    const x=rand(14,114), h=rand(45,118), sway=rand(-22,22);
+    g.strokeStyle = pal[i%pal.length];
+    g.lineWidth = rand(2.5,4.5);
+    g.globalAlpha = rand(0.75,1);
+    g.beginPath();
+    g.moveTo(x,126);
+    g.quadraticCurveTo(x+sway*0.3, 126-h*0.55, x+sway, 126-h);
+    g.stroke();
+  }
+  g.globalAlpha = 1;
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+function cloudTexture(){
+  const c = document.createElement('canvas'); c.width = c.height = 256;
+  const g = c.getContext('2d');
+  for (let i=0;i<8;i++){
+    const x=rand(40,216), y=rand(90,166), r=rand(30,60);
+    const gr = g.createRadialGradient(x,y,0,x,y,r);
+    gr.addColorStop(0,'rgba(255,244,224,0.55)');
+    gr.addColorStop(1,'rgba(255,244,224,0)');
+    g.fillStyle = gr; g.beginPath(); g.arc(x,y,r,0,7); g.fill();
+  }
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+
+/* ---------- sun disc + halo ---------- */
+const sunDisc = new THREE.Sprite(new THREE.SpriteMaterial({
+  map: radialTex([[0,'rgba(255,250,235,1)'],[0.55,'rgba(255,240,210,0.95)'],[1,'rgba(255,230,180,0)']]),
+  fog:false, depthWrite:false
+}));
+sunDisc.scale.set(30,30,1);
+const sunHalo = new THREE.Sprite(new THREE.SpriteMaterial({
+  map: radialTex([[0,'rgba(255,215,150,0.9)'],[0.35,'rgba(255,195,120,0.35)'],[1,'rgba(255,180,100,0)']]),
+  transparent:true, blending:THREE.AdditiveBlending, fog:false, depthWrite:false
+}));
+sunHalo.scale.set(160,160,1);
+scene.add(sunDisc, sunHalo);
+
+/* ---------- lights ---------- */
+const hemi = new THREE.HemisphereLight(0x93b3d3, 0xbd7d43, 0.5);
+scene.add(hemi);
+const sunLight = new THREE.DirectionalLight(0xff9e4a, 2.8);
+sunLight.castShadow = true;
+sunLight.shadow.mapSize.set(2048, 2048);
+Object.assign(sunLight.shadow.camera, { left:-70, right:70, top:70, bottom:-70, near:10, far:320 });
+sunLight.shadow.camera.updateProjectionMatrix();
+sunLight.shadow.bias = -0.0004;
+sunLight.shadow.normalBias = 0.05;
+scene.add(sunLight, sunLight.target);
+
+/* ---------- ground ---------- */
+const groundGeo = new THREE.PlaneGeometry(520, 520, 130, 130);
+groundGeo.rotateX(-Math.PI/2);
+{
+  const gp = groundGeo.attributes.position, gc = [];
+  const cA = new THREE.Color('#d9a356'), cB = new THREE.Color('#c08140'), cC = new THREE.Color('#e0b06a');
+  const tc = new THREE.Color();
+  for (let i=0;i<gp.count;i++){
+    const x = gp.getX(i), z = gp.getZ(i);
+    gp.setY(i, groundH(x,z));
+    const n = Math.sin(x*0.07+1.2)*Math.sin(z*0.06-0.7) + Math.sin(x*0.023+4)*0.7;
+    const t2 = clamp(0.5 + n*0.3, 0, 1);
+    tc.copy(cA).lerp(t2>0.55 ? cC : cB, Math.abs(t2-0.5)*1.5);
+    tc.offsetHSL(0,0,(Math.random()-0.5)*0.015);
+    gc.push(tc.r,tc.g,tc.b);
+  }
+  groundGeo.setAttribute('color', new THREE.Float32BufferAttribute(gc,3));
+  groundGeo.computeVertexNormals();
+}
+const ground = new THREE.Mesh(groundGeo,
+  new THREE.MeshStandardMaterial({ vertexColors:true, roughness:1 }));
+ground.receiveShadow = true;
+scene.add(ground);
+
+/* ---------- acacia trees, rocks, bushes ---------- */
+function makeTree(){
+  const g = new THREE.Group();
+  const bark = new THREE.MeshStandardMaterial({ color:0x6d4a2c, roughness:1 });
+  const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.13,0.26,1.6,8), bark);
+  trunk.position.y = 0.8; trunk.rotation.z = rand(-0.08,0.08);
+  g.add(trunk);
+  for (let k=0;k<4;k++){
+    const holder = new THREE.Group();
+    holder.position.y = 1.5;
+    holder.rotation.y = k*(Math.PI/2) + rand(-0.4,0.4);
+    holder.rotation.x = rand(0.45,0.8);
+    const b = new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.08,1.0,6), bark);
+    b.position.y = 0.5;
+    holder.add(b); g.add(holder);
+  }
+  const leaf = new THREE.MeshStandardMaterial({
+    color: new THREE.Color(0x55612f).offsetHSL(rand(-0.02,0.03),rand(-0.05,0.05),rand(-0.03,0.03)),
+    roughness:1, flatShading:true
+  });
+  for (let j=0;j<4;j++){
+    const c = new THREE.Mesh(new THREE.IcosahedronGeometry(rand(0.9,1.5),1), leaf);
+    c.scale.y = 0.26;
+    c.position.set(rand(-0.8,0.8), 1.85 + j*0.18 + rand(-0.1,0.1), rand(-0.8,0.8));
+    c.rotation.y = rand(Math.PI*2);
+    g.add(c);
+  }
+  g.traverse(o => o.castShadow = true);
+  return g;
+}
+for (let i=0;i<9;i++){
+  const tr = makeTree();
+  const a = rand(Math.PI*2), r = rand(14,48);
+  const x = Math.cos(a)*r, z = Math.sin(a)*r;
+  tr.position.set(x, groundH(x,z)-0.06, z);
+  tr.scale.setScalar(rand(0.9,1.7));
+  tr.rotation.y = rand(Math.PI*2);
+  scene.add(tr);
+}
+{
+  const rockMat = new THREE.MeshStandardMaterial({ color:0x93826b, roughness:1, flatShading:true });
+  for (let i=0;i<24;i++){
+    const rk = new THREE.Mesh(new THREE.DodecahedronGeometry(rand(0.18,0.55),0), rockMat);
+    const a = rand(Math.PI*2), r = rand(6,70);
+    const x = Math.cos(a)*r, z = Math.sin(a)*r;
+    rk.position.set(x, groundH(x,z)+0.05, z);
+    rk.scale.y = rand(0.5,0.8);
+    rk.rotation.set(rand(3),rand(3),rand(3));
+    rk.castShadow = rk.receiveShadow = true;
+    scene.add(rk);
+  }
+  const bushMats = [0x6d7a3c,0x7a7a40,0x5f6f38].map(c =>
+    new THREE.MeshStandardMaterial({ color:c, roughness:1, flatShading:true }));
+  for (let i=0;i<26;i++){
+    const b = new THREE.Mesh(new THREE.IcosahedronGeometry(rand(0.3,0.65),0), bushMats[i%3]);
+    const a = rand(Math.PI*2), r = rand(5,65);
+    const x = Math.cos(a)*r, z = Math.sin(a)*r;
+    b.position.set(x, groundH(x,z)+0.1, z);
+    b.scale.y = 0.55;
+    b.castShadow = true;
+    scene.add(b);
+  }
+}
+
+/* ---------- wind-swaying grass (instanced) ---------- */
+const uTime = { value: 0 };
+{
+  const blade = new THREE.PlaneGeometry(1,1); blade.translate(0,0.5,0);
+  const blade2 = blade.clone().rotateY(Math.PI/2);
+  const tuftGeo = mergeGeometries([blade, blade2]);
+  const grassMat = new THREE.MeshStandardMaterial({
+    map: grassTexture(), alphaTest:0.5, side:THREE.DoubleSide, roughness:1 });
+  grassMat.onBeforeCompile = (sh) => {
+    sh.uniforms.uTime = uTime;
+    sh.vertexShader = 'uniform float uTime;\n' + sh.vertexShader.replace(
+      '#include <begin_vertex>',
+      `#include <begin_vertex>
+       #ifdef USE_INSTANCING
+         vec3 ip = vec3(instanceMatrix[3][0], instanceMatrix[3][1], instanceMatrix[3][2]);
+         float gh = ip.x*0.31 + ip.z*0.23;
+         transformed.x += (sin(uTime*1.7+gh)*0.7 + sin(uTime*3.3+gh*1.9)*0.3) * 0.07 * position.y;
+         transformed.z += cos(uTime*1.3+gh) * 0.05 * position.y;
+       #endif`
+    );
+  };
+  const N = 2200;
+  const grass = new THREE.InstancedMesh(tuftGeo, grassMat, N);
+  const m = new THREE.Matrix4(), q = new THREE.Quaternion(),
+        s = new THREE.Vector3(), p = new THREE.Vector3(), up = new THREE.Vector3(0,1,0);
+  for (let i=0;i<N;i++){
+    const r = Math.sqrt(Math.random())*95, a = rand(Math.PI*2);
+    const x = Math.cos(a)*r, z = Math.sin(a)*r;
+    p.set(x, groundH(x,z)-0.02, z);
+    q.setFromAxisAngle(up, rand(Math.PI*2));
+    const sc = rand(0.5,1.3);
+    s.set(sc, sc*rand(0.8,1.4), sc);
+    m.compose(p,q,s);
+    grass.setMatrixAt(i,m);
+  }
+  grass.instanceMatrix.needsUpdate = true;
+  grass.frustumCulled = false;
+  scene.add(grass);
+}
+
+/* ---------- clouds, dust, birds ---------- */
+const clouds = [];
+const cTex = cloudTexture();
+for (let i=0;i<6;i++){
+  const s = new THREE.Sprite(new THREE.SpriteMaterial({
+    map:cTex, transparent:true, opacity:rand(0.35,0.6), depthWrite:false }));
+  const sc = rand(18,36);
+  s.scale.set(sc, sc*0.55, 1);
+  scene.add(s);
+  clouds.push({ s, a:rand(Math.PI*2), r:rand(90,200), y:rand(32,55), sp:rand(0.003,0.008) });
+}
+const dustN = 160, dustPos = new Float32Array(dustN*3);
+for (let i=0;i<dustN;i++){ dustPos[i*3]=rand(-28,28); dustPos[i*3+1]=rand(0.3,7); dustPos[i*3+2]=rand(-28,28); }
+const dustGeo = new THREE.BufferGeometry();
+dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos,3));
+const dust = new THREE.Points(dustGeo, new THREE.PointsMaterial({
+  color:0xffe6bd, size:0.07, transparent:true, opacity:0.4, depthWrite:false }));
+scene.add(dust);
+
+const birds = [];
+{
+  const mat = new THREE.MeshBasicMaterial({ color:0x3a2c20, side:THREE.DoubleSide });
+  const wg = new THREE.PlaneGeometry(0.85,0.3);
+  wg.rotateX(-Math.PI/2); wg.translate(0.45,0,0);
+  const wg2 = wg.clone(); wg2.rotateY(Math.PI);
+  for (let i=0;i<5;i++){
+    const g = new THREE.Group();
+    const body = new THREE.Mesh(new THREE.ConeGeometry(0.07,0.45,5), mat);
+    body.rotation.x = Math.PI/2;
+    const wL = new THREE.Mesh(wg, mat), wR = new THREE.Mesh(wg2, mat);
+    g.add(body, wL, wR);
+    scene.add(g);
+    birds.push({ g, wL, wR,
+      cx:rand(-50,50), cy:rand(24,38), cz:rand(-50,50),
+      r:rand(14,30), a:rand(Math.PI*2),
+      sp:rand(0.06,0.12)*(Math.random()<0.5?1:-1),
+      flap:rand(6,10), ph:rand(Math.PI*2) });
+  }
+}
+
+/* ---------- the giraffe ---------- */
+const skinMat  = new THREE.MeshStandardMaterial({ map:skinTexture(), roughness:0.85 });
+const creamMat = new THREE.MeshStandardMaterial({ color:0xd8a96c, roughness:0.9 });
+const darkMat  = new THREE.MeshStandardMaterial({ color:0x33241a, roughness:0.9 });
+
+const giraffe = new THREE.Group();
+const rig = new THREE.Group();
+giraffe.add(rig);
+
+function limb(upperR, lowerR, upLen, loLen){
+  const hip = new THREE.Group();
+  const up = new THREE.Mesh(new THREE.CylinderGeometry(upperR, upperR*0.8, upLen, 10), skinMat);
+  up.position.y = -upLen/2;
+  const knee = new THREE.Group();
+  knee.position.y = -upLen;
+  hip.add(up, knee);
+  const lo = new THREE.Mesh(new THREE.CylinderGeometry(upperR*0.6, lowerR, loLen, 10), skinMat);
+  lo.position.y = -loLen/2;
+  knee.add(lo);
+  const hoof = new THREE.Mesh(new THREE.CylinderGeometry(lowerR*1.3, lowerR*1.1, 0.12, 10), darkMat);
+  hoof.position.y = -loLen - 0.05;
+  knee.add(hoof);
+  return { hip, knee };
+}
+/* walk = diagonal pairs; trot = front pair / rear pair */
+const legDefs = [
+  { x: 0.24, z: 0.58, y:1.60, walkPhase:0,         trotPhase:0 },
+  { x:-0.24, z: 0.58, y:1.60, walkPhase:Math.PI,   trotPhase:0 },
+  { x: 0.24, z:-0.58, y:1.52, walkPhase:Math.PI,   trotPhase:Math.PI },
+  { x:-0.24, z:-0.58, y:1.52, walkPhase:0,         trotPhase:Math.PI },
+];
+const legs = legDefs.map(d => {
+  const { hip, knee } = limb(0.105, 0.05, 0.72, 0.72);
+  hip.position.set(d.x, d.y, d.z);
+  rig.add(hip);
+  return { hip, knee, walkPhase:d.walkPhase, trotPhase:d.trotPhase };
+});
+
+const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.44, 0.9, 6, 14), skinMat);
+body.rotation.x = Math.PI/2;
+body.position.set(0, 1.62, -0.05);
+rig.add(body);
+
+const neckPivot = new THREE.Group();
+neckPivot.position.set(0, 1.95, 0.52);
+rig.add(neckPivot);
+const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.26, 1.75, 12), skinMat);
+neck.position.y = 0.875;
+neckPivot.add(neck);
+
+const head = new THREE.Group();
+head.position.set(0, 1.72, 0);
+neckPivot.add(head);
+const skull = new THREE.Mesh(new THREE.SphereGeometry(0.24, 14, 12), skinMat);
+skull.scale.set(0.85, 0.72, 1.15);
+head.add(skull);
+const muzzle = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.15, 0.3), creamMat);
+muzzle.position.set(0, -0.1, 0.24);
+head.add(muzzle);
+const eyeGeo = new THREE.SphereGeometry(0.032, 8, 8);
+const eL = new THREE.Mesh(eyeGeo, darkMat); eL.position.set(-0.17, 0.06, 0.1);
+const eR = new THREE.Mesh(eyeGeo, darkMat); eR.position.set( 0.17, 0.06, 0.1);
+head.add(eL, eR);
+function makeOssi(x){
+  const g = new THREE.Group();
+  const stick = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.03, 0.2, 8), skinMat);
+  stick.position.y = 0.1;
+  const tip = new THREE.Mesh(new THREE.SphereGeometry(0.05, 10, 8), darkMat);
+  tip.position.y = 0.22;
+  g.add(stick, tip);
+  g.position.set(x, 0.17, -0.04);
+  return g;
+}
+head.add(makeOssi(-0.08), makeOssi(0.08));
+const earGeo = new THREE.SphereGeometry(0.11, 10, 8);
+const earL = new THREE.Mesh(earGeo, skinMat);
+earL.scale.set(0.22,0.5,0.9); earL.position.set(-0.2,0.05,-0.16);
+earL.rotation.set(0,-0.4,0.9);
+const earR = new THREE.Mesh(earGeo, skinMat);
+earR.scale.set(0.22,0.5,0.9); earR.position.set(0.2,0.05,-0.16);
+earR.rotation.set(0,0.4,-0.9);
+head.add(earL, earR);
+
+const tailPivot = new THREE.Group();
+tailPivot.position.set(0, 1.92, -0.9);
+rig.add(tailPivot);
+const tailStick = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.02, 0.55, 8), skinMat);
+tailStick.position.y = -0.27;
+const tailTuft = new THREE.Mesh(new THREE.ConeGeometry(0.07, 0.24, 8), darkMat);
+tailTuft.rotation.x = Math.PI;
+tailTuft.position.y = -0.6;
+tailPivot.add(tailStick, tailTuft);
+tailPivot.rotation.x = 0.55;
+
+giraffe.traverse(o => { if (o.isMesh) o.castShadow = true; });
+giraffe.scale.setScalar(1.05);
+giraffe.position.set(0, groundH(0,0), 0);
+scene.add(giraffe);
+
+/* ---------- state & wander AI ---------- */
+const state = {
+  target: new THREE.Vector3(0, 0, 12),
+  yaw: 0, phase: 0, gait: 0, graze: 0, speedSm: 0
+};
+function pickTarget(){
+  const a = rand(Math.PI*2), r = rand(5,22);
+  state.target.set(Math.cos(a)*r, 0, Math.sin(a)*r);
+}
+let trotting=false, freeCam=false, grazeOn=false, presetName='dawn', flick=0;
+let tossStart=-10, nextToss=5;
+
+const _v1=new THREE.Vector3(), _v2=new THREE.Vector3(),
+      _v3=new THREE.Vector3(), _v4=new THREE.Vector3();
+
+function updateGiraffe(dt, t){
+  state.graze = lerp(state.graze, grazeOn?1:0, 1-Math.exp(-2.6*dt));
+  state.gait  = lerp(state.gait,  trotting?1:0, 1-Math.exp(-3*dt));
+
+  const toT = _v1.subVectors(state.target, giraffe.position); toT.y = 0;
+  const dist = toT.length();
+  if (dist < 2.5 || giraffe.position.length() > 34) pickTarget();
+
+  const desiredYaw = Math.atan2(toT.x, toT.z);
+  let dy = desiredYaw - state.yaw;
+  dy = Math.atan2(Math.sin(dy), Math.cos(dy));
+  state.yaw += clamp(dy, -1.4*dt, 1.4*dt);
+  const align = Math.max(0, Math.cos(dy));           // slow down while turning
+
+  const want = state.graze > 0.4 ? 0 : (1.7 + state.gait*3.5) * align;
+  state.speedSm = lerp(state.speedSm, want, 1-Math.exp(-2.2*dt));
+
+  const mf = clamp(state.speedSm/1.7, 0, 1);
+  const f  = lerp(1.0, 1.9, state.gait);
+  state.phase += dt * Math.PI * 2 * f * mf;
+
+  giraffe.position.x += Math.sin(state.yaw) * state.speedSm * dt;
+  giraffe.position.z += Math.cos(state.yaw) * state.speedSm * dt;
+  giraffe.position.y = groundH(giraffe.position.x, giraffe.position.z);
+  giraffe.rotation.y = state.yaw;
+
+  const amp = lerp(0.5, 0.85, state.gait) * mf;
+  for (const leg of legs){
+    const ph = state.phase + lerp(leg.walkPhase, leg.trotPhase, state.gait);
+    const s = Math.sin(ph);
+    leg.hip.rotation.x  = s * amp;
+    leg.knee.rotation.x = Math.max(0, s) * (0.75 + 0.5*state.gait) * mf;
+  }
+
+  const bobA = lerp(0.05, 0.15, state.gait) * mf;
+  rig.position.y  = Math.sin(state.phase*2 + Math.PI/2) * bobA;
+  rig.rotation.x  = Math.sin(state.phase*2) * lerp(0.04, 0.09, state.gait) * mf;
+  rig.rotation.z  = Math.sin(state.phase)   * lerp(0.03, 0.05, state.gait) * mf;
+
+  const neckTarget = lerp(0.32, 1.72, state.graze);
+  neckPivot.rotation.x = neckTarget
+    + Math.sin(state.phase*2) * 0.035 * mf
+    + Math.sin(t*0.45) * 0.02;
+  head.rotation.x = lerp(-0.06, -0.5, state.graze)
+    + Math.sin(state.phase*2 + 1) * 0.03 * mf;
+
+  if (t > nextToss && state.graze < 0.5){
+    tossStart = t; nextToss = t + 7 + Math.random()*9;
+  }
+  const tu = (t - tossStart) / 0.9;
+  const toss = (tu>0 && tu<1) ? Math.sin(Math.PI*tu) * 0.55 : 0;
+  head.rotation.y = (state.graze > 0.4 ? Math.sin(t*2.1)*0.3 : Math.sin(t*0.65)*0.12) + toss;
+  earR.rotation.z = -0.9 + Math.pow(Math.max(0, Math.sin(t*0.7+1.3)), 8) * 0.5;
+
+  flick = Math.max(0, flick - dt*1.4);
+  tailPivot.rotation.z = Math.sin(t*1.3)*0.16 + Math.sin(flick*14)*flick*0.7;
+  tailPivot.rotation.x = 0.55 + Math.sin(state.phase*2)*0.12*mf;
+}
+
+/* ---------- camera ---------- */
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enabled = false;
+controls.enableDamping = true;
+controls.dampingFactor = 0.06;
+controls.minDistance = 2.5;
+controls.maxDistance = 45;
+controls.maxPolarAngle = Math.PI * 0.49;
+
+let tParX=0, tParY=0, parX=0, parY=0;
+const lookCur = new THREE.Vector3(0, 2.4, 1);
+
+function updateCamera(dt, t){
+  head.getWorldPosition(_v2);
+  if (freeCam){
+    controls.target.lerp(_v3.copy(_v2).add(_v4.set(0,0.4,0)), 1-Math.exp(-2.5*dt));
+    controls.update();
+  } else {
+    parX = lerp(parX, tParX, 1-Math.exp(-4*dt));
+    parY = lerp(parY, tParY, 1-Math.exp(-4*dt));
+    const ang = t*0.05 + parX*0.4;
+    const gx = giraffe.position.x, gz = giraffe.position.z, gy = giraffe.position.y;
+    _v3.set(gx + Math.sin(ang)*8.6, 0, gz + Math.cos(ang)*8.6);
+    _v3.y = Math.max(groundH(_v3.x, _v3.z) + 0.9, gy + 3.3 - parY*0.9);
+    camera.position.lerp(_v3, 1-Math.exp(-2.6*dt));
+    lookCur.lerp(_v4.copy(_v2).add(_v4.set(0,0.3,0)), 1-Math.exp(-3.5*dt));
+    camera.lookAt(lookCur);
+  }
+}
+addEventListener('mousemove', e => {
+  tParX = (e.clientX/innerWidth  - 0.5) * 2;
+  tParY = (e.clientY/innerHeight - 0.5) * 2;
+});
+
+/* ---------- time of day ---------- */
+const V3 = (x,y,z) => new THREE.Vector3(x,y,z);
+const PRESETS = {
+  dawn: {
+    sunDir: V3(-0.62,0.26,-0.74).normalize(),
+    sunCol: new THREE.Color('#ff9e4a'), sunInt: 2.8,
+    hemiSky: new THREE.Color('#93b3d3'), hemiGnd: new THREE.Color('#bd7d43'), hemiInt: 0.5,
+    fogCol: new THREE.Color('#efc28b'), fogNear: 36, fogFar: 235,
+    skyTop: new THREE.Color('#6d9cc4'), skyBot: new THREE.Color('#ffd291'),
+    haloCol: new THREE.Color('#ffcf96'), sunTint: new THREE.Color('#fff0cf'),
+    exposure: 1.12, clock: 6*60+41
+  },
+  noon: {
+    sunDir: V3(0.42,0.86,-0.28).normalize(),
+    sunCol: new THREE.Color('#fff0cf'), sunInt: 2.5,
+    hemiSky: new THREE.Color('#c2d9ec'), hemiGnd: new THREE.Color('#d3a567'), hemiInt: 0.8,
+    fogCol: new THREE.Color('#e8d8ac'), fogNear: 70, fogFar: 330,
+    skyTop: new THREE.Color('#4e8ec6'), skyBot: new THREE.Color('#d8e4e2'),
+    haloCol: new THREE.Color('#fff3d6'), sunTint: new THREE.Color('#ffffff'),
+    exposure: 1.02, clock: 12*60+6
+  }
+};
+function clonePreset(p){
+  return {
+    sunDir:p.sunDir.clone(), sunCol:p.sunCol.clone(), sunInt:p.sunInt,
+    hemiSky:p.hemiSky.clone(), hemiGnd:p.hemiGnd.clone(), hemiInt:p.hemiInt,
+    fogCol:p.fogCol.clone(), fogNear:p.fogNear, fogFar:p.fogFar,
+    skyTop:p.skyTop.clone(), skyBot:p.skyBot.clone(),
+    haloCol:p.haloCol.clone(), sunTint:p.sunTint.clone(),
+    exposure:p.exposure, clock:p.clock
+  };
+}
+const timeCur = clonePreset(PRESETS.dawn);
+
+function updateTime(dt){
+  const P = PRESETS[presetName], c = timeCur;
+  const k = 1 - Math.exp(-1.5*dt);
+  c.sunDir.lerp(P.sunDir,k).normalize();
+  c.sunCol.lerp(P.sunCol,k);  c.hemiSky.lerp(P.hemiSky,k);  c.hemiGnd.lerp(P.hemiGnd,k);
+  c.fogCol.lerp(P.fogCol,k);  c.skyTop.lerp(P.skyTop,k);    c.skyBot.lerp(P.skyBot,k);
+  c.haloCol.lerp(P.haloCol,k);c.sunTint.lerp(P.sunTint,k);
+  c.sunInt = lerp(c.sunInt,P.sunInt,k);  c.hemiInt = lerp(c.hemiInt,P.hemiInt,k);
+  c.fogNear = lerp(c.fogNear,P.fogNear,k); c.fogFar = lerp(c.fogFar,P.fogFar,k);
+  c.exposure = lerp(c.exposure,P.exposure,k);
+  c.clock = lerp(c.clock,P.clock,k) + dt*0.05;
+
+  sunLight.color.copy(c.sunCol); sunLight.intensity = c.sunInt;
+  sunLight.position.copy(c.sunDir).multiplyScalar(130);
+  hemi.color.copy(c.hemiSky); hemi.groundColor.copy(c.hemiGnd); hemi.intensity = c.hemiInt;
+  scene.fog.color.copy(c.fogCol); scene.fog.near = c.fogNear; scene.fog.far = c.fogFar;
+  skyMat.uniforms.topColor.value.copy(c.skyTop);
+  skyMat.uniforms.botColor.value.copy(c.skyBot);
+  skyMat.uniforms.sunDir.value.copy(c.sunDir);
+  sunDisc.material.color.copy(c.sunTint);  sunDisc.position.copy(c.sunDir).multiplyScalar(370);
+  sunHalo.material.color.copy(c.haloCol);  sunHalo.position.copy(c.sunDir).multiplyScalar(370);
+  renderer.toneMappingExposure = c.exposure;
+}
+
+/* ---------- ambient life ---------- */
+function updateBirds(t, dt){
+  for (const b of birds){
+    b.a += b.sp*dt;
+    b.g.position.set(b.cx + Math.cos(b.a)*b.r,
+                     b.cy + Math.sin(t*0.5+b.ph)*1.5,
+                     b.cz + Math.sin(b.a)*b.r);
+    const sg = Math.sign(b.sp);
+    b.g.rotation.y = Math.atan2(-Math.sin(b.a)*sg, Math.cos(b.a)*sg);
+    const w = Math.sin(t*b.flap + b.ph)*0.55 + 0.12;
+    b.wL.rotation.z = w; b.wR.rotation.z = -w;
+  }
+}
+function updateClouds(dt){
+  for (const c of clouds){
+    c.a += c.sp*dt;
+    c.s.position.set(Math.cos(c.a)*c.r, c.y, Math.sin(c.a)*c.r);
+  }
+}
+
+/* ---------- HUD ---------- */
+const roClock = document.getElementById('ro-clock');
+const roCoord = document.getElementById('ro-coord');
+const roGait  = document.getElementById('ro-gait');
+const roSpeed = document.getElementById('ro-speed');
+function fmtClock(min){
+  const h = Math.floor(min/60)%24, m = Math.floor(min%60), s = Math.floor((min%1)*60);
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+}
+function updateHUD(){
+  roClock.textContent = fmtClock(timeCur.clock);
+  roCoord.textContent = (2.3841 + giraffe.position.z*0.0011).toFixed(4) + '° S · '
+                      + (34.8342 + giraffe.position.x*0.0011).toFixed(4) + '° E';
+  roGait.textContent = state.graze > 0.4 ? 'Grazing'
+    : state.speedSm < 0.2 ? 'Standing'
+    : state.gait > 0.5 ? 'Trotting' : 'Walking';
+  roSpeed.textContent = state.speedSm.toFixed(1) + ' m/s';
+}
+
+/* ---------- controls ---------- */
+const btnGait = document.getElementById('btn-gait');
+const gaitLabel = document.getElementById('gait-label');
+const btnCam  = document.getElementById('btn-cam');
+const btnTime = document.getElementById('btn-time');
+
+function setTrot(v){
+  trotting = v;
+  gaitLabel.textContent = v ? 'Walk' : 'Trot';
+  btnGait.setAttribute('aria-pressed', String(v));
+}
+function setCam(v){
+  freeCam = v;
+  controls.enabled = v;
+  if (v){ head.getWorldPosition(_v2); controls.target.copy(_v2); }
+  btnCam.textContent = v ? 'Cinematic cam' : 'Free camera';
+  btnCam.setAttribute('aria-pressed', String(v));
+}
+function setTime(name){
+  presetName = name;
+  btnTime.textContent = name === 'dawn' ? 'Noon light' : 'Golden hour';
+  btnTime.setAttribute('aria-pressed', String(name !== 'dawn'));
+}
+function toggleGraze(){ grazeOn = !grazeOn; if (grazeOn) flick = 1; }
+
+btnGait.addEventListener('click', () => setTrot(!trotting));
+btnCam .addEventListener('click', () => setCam(!freeCam));
+btnTime.addEventListener('click', () => setTime(presetName === 'dawn' ? 'noon' : 'dawn'));
+
+addEventListener('keydown', e => {
+  if (e.code === 'Space'){ e.preventDefault(); setTrot(!trotting); }
+  else if (e.key === 'c' || e.key === 'C') setCam(!freeCam);
+  else if (e.key === 'g' || e.key === 'G') toggleGraze();
+});
+let dX=0, dY=0;
+renderer.domElement.addEventListener('pointerdown', e => { dX=e.clientX; dY=e.clientY; });
+addEventListener('pointerup', e => {
+  if (e.target !== renderer.domElement) return;
+  if (Math.hypot(e.clientX-dX, e.clientY-dY) > 8) return;
+  toggleGraze();
+});
+addEventListener('resize', () => {
+  camera.aspect = innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+
+/* ---------- main loop ---------- */
+const clock = new THREE.Clock();
+function tick(){
+  requestAnimationFrame(tick);
+  const dt = Math.min(clock.getDelta(), 0.05);
+  const t = clock.elapsedTime;
+  uTime.value = t;
+
+  updateTime(dt);
+  updateGiraffe(dt, t);
+  updateBirds(t, dt);
+  updateClouds(dt);
+  dust.rotation.y = t*0.012;
+  dust.position.y = Math.sin(t*0.13)*0.4;
+  updateCamera(dt, t);
+  updateHUD();
+
+  renderer.render(scene, camera);
+}
+tick();
+setTimeout(() => document.getElementById('intro').classList.add('gone'), 1400);
+</script>
+</body>
+</html>
