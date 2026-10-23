@@ -36,6 +36,7 @@ for the original idea of testing models on 3D creation.
 | claude-opus-5-5 | max | 2026-10-23 | [2026-10-23_max.html](claude-opus-5-5/2026-10-23_max.html) | **+6** | +🦵🚶🤸🦴🦒🌅 |  |
 | claude-haiku-5-5 | max | 2026-10-23 | [2026-10-23_max.html](claude-haiku-5-5/2026-10-23_max.html) | **+5** | +🦵🚶🤸🦒🌅 |  |
 | qwen3-8-27b-udq4kxl | default | 2026-10-23 | [2026-10-23_default.html](qwen3-8-27b-udq4kxl/2026-10-23_default.html) | **+5** | +🦵🚶🤸🦒🌅 | 🦙 ⏳ |
+| nemotron-3-5-bolt-e4b-udq8kxl | default | 2026-10-23 | [2026-10-23_default.html](nemotron-3-5-bolt-e4b-udq8kxl/2026-10-23_default.html) | **-1** | −🚪 | 🦙 |
 
 🎖️ **Curator's whim:** 🥇🥈🥉 medals are awarded entirely on the curator's whim, independent of Giraffe Points.
 
@@ -60,7 +61,7 @@ Originals: [chatgpt-sol-6-1 xhigh](chatgpt-sol-6-1/2026-10-22_xhigh.wrapper.html
 |-------|------------|-----------------------|
 | nemotron-3-5-lightning-30b-nvfp4 | `nemotron-3.5-lightning:30b-mlx` | `true` (unverified) |
 
-🦙 **llama-server run.** Same MacBook Pro (Apple M2 Pro, 32 GB), but Cherry Studio → llama.cpp's llama-server instead of Ollama, loading qwen3.8-27b-ud-q4kxl.gguf (Unsloth UD-Q4_K_XL). Effort is Cherry's thinking setting.
+🦙 **llama-server run.** Same MacBook Pro (Apple M2 Pro, 32 GB), but Cherry Studio → llama.cpp's llama-server instead of Ollama, loading an Unsloth UD GGUF (quant in the folder name). Effort is Cherry's thinking setting.
 
 ⏳ **The Long Walk.** Took about 3 hours to finish with llama-server's out-of-the-box settings, no tuning. The page titled itself "The Long Walk", which is fair.
 
