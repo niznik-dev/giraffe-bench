@@ -300,6 +300,38 @@
         "frontlegs": "no",
         "flex": "yes"
       }
+    },
+    "claude-sonnet-5-5/2026-10-23_max.html": {
+      "label": "Claude Sonnet 5.5",
+      "where": "hosted",
+      "vibes": {
+        "legs": "yes",
+        "walks": "yes",
+        "giraffe": "yes",
+        "savannah": "yes",
+        "nightmare": "no",
+        "ghost": "no",
+        "wanders": "no",
+        "hocks": "yes",
+        "frontlegs": "no",
+        "flex": "yes"
+      }
+    },
+    "claude-opus-5-5/2026-10-23_max.html": {
+      "label": "Claude Opus 5.5",
+      "where": "hosted",
+      "vibes": {
+        "legs": "yes",
+        "walks": "yes",
+        "giraffe": "yes",
+        "savannah": "yes",
+        "nightmare": "no",
+        "ghost": "no",
+        "wanders": "no",
+        "hocks": "yes",
+        "frontlegs": "no",
+        "flex": "yes"
+      }
     }
   },
   "pending": [],

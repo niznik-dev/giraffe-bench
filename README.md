@@ -32,6 +32,8 @@ for the original idea of testing models on 3D creation.
 | gemma4-12b-q4km | default | 2026-10-22 | [2026-10-22_default.html](gemma4-12b-q4km/2026-10-22_default.html) | **-1** | +🦵 −😱🚪 | 💻 |
 | qwen3-8-27b-nvfp4 | default | 2026-10-22 | [2026-10-22_default.html](qwen3-8-27b-nvfp4/2026-10-22_default.html) | **+0** | +🦵🦒 −😱👻 | 💻 |
 | ornith-1-5-9b-q4km | default | 2026-10-22 | [2026-10-22_default.html](ornith-1-5-9b-q4km/2026-10-22_default.html) | **+1** | +🦵🦒🌅 −😱👻 | 💻 |
+| claude-sonnet-5-5 | max | 2026-10-23 | [2026-10-23_max.html](claude-sonnet-5-5/2026-10-23_max.html) | **+6** | +🦵🚶🤸🦴🦒🌅 |  |
+| claude-opus-5-5 | max | 2026-10-23 | [2026-10-23_max.html](claude-opus-5-5/2026-10-23_max.html) | **+6** | +🦵🚶🤸🦴🦒🌅 |  |
 | qwen3-8-27b-udq4kxl | default | 2026-10-23 | [2026-10-23_default.html](qwen3-8-27b-udq4kxl/2026-10-23_default.html) | **+5** | +🦵🚶🤸🦒🌅 | 🦙 ⏳ |
 
 🎖️ **Curator's whim:** 🥇🥈🥉 medals are awarded entirely on the curator's whim, independent of Giraffe Points.
