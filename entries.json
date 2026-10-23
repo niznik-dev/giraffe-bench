@@ -332,6 +332,22 @@
         "frontlegs": "no",
         "flex": "yes"
       }
+    },
+    "claude-haiku-5-5/2026-10-23_max.html": {
+      "label": "Claude Haiku 5.5",
+      "where": "hosted",
+      "vibes": {
+        "legs": "yes",
+        "walks": "yes",
+        "giraffe": "yes",
+        "savannah": "yes",
+        "nightmare": "no",
+        "ghost": "no",
+        "wanders": "no",
+        "hocks": "no",
+        "frontlegs": "no",
+        "flex": "yes"
+      }
     }
   },
   "pending": [],
