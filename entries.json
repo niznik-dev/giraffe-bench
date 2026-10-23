@@ -424,6 +424,12 @@
       "gold": "claude-sonnet-5-5/2026-10-23_max.html",
       "silver": "chatgpt-sol-6-1/2026-10-22_xhigh.html",
       "bronze": "claude-opus-5-5/2026-10-23_max.html"
+    },
+    {
+      "since": "2026-10-23T17:44:51-04:00",
+      "gold": "claude-sonnet-5-5/2026-10-23_max.html",
+      "silver": "chatgpt-sol-6-1/2026-10-23_pro.html",
+      "bronze": "chatgpt-sol-6-1/2026-10-22_xhigh.html"
     }
   ]
 }

@@ -133,9 +133,11 @@ def fmt_gp(e):
     return "?" if (score := gp(e)) is None else f"{score:+d}"
 
 
-def former_glory(e):
-    """'was 🥇' for entries that once held a better medal than they hold now; '' otherwise."""
-    return f"was {MEDALS[e['peak_medal']]}" if e.get("peak_medal") else ""
+def peak_note(e):
+    """Hover text for the ⭐ on entries that once held a better medal than they hold now; '' otherwise."""
+    if not e.get("peak_medal"):
+        return ""
+    return f"Highest rank ever: {MEDALS[e['peak_medal']]} {e['peak_medal']} (until {e['dethroned']})"
 
 
 def readme_gallery(flags, entries, pending, failed):
@@ -147,8 +149,8 @@ def readme_gallery(flags, entries, pending, failed):
         unjudged = sum(k not in e["vibes"] for k in VIBE_KEYS)
         vibes = " ".join(filter(None, [bonus and f"+{bonus}", penalty and f"−{penalty}", unjudged and f"❔×{unjudged}"]))
         medal = f" {MEDALS[e['medal']]}" if e.get("medal") else ""
-        if was := former_glory(e):
-            medal += f" <sub>({was})</sub>"
+        if note := peak_note(e):
+            medal += f' <span title="{esc(note)}">⭐</span>'
         lines.append(f"| {e['slug']}{medal} | {e['effort']} | {e['date']} | [{name}]({e['path']}) | **{fmt_gp(e)}** | {vibes} | {' '.join(e['flags'])} |")
     if any(e.get("medal") for e in entries):
         lines += ["", "🎖️ **Curator's whim:** 🥇🥈🥉 medals are " + WHIM[0].lower() + WHIM[1:]]
@@ -217,7 +219,7 @@ def podium(entries):
     if fallen:
         names = " · ".join(
             f'<b>{esc(e["label"])}</b> {esc(e["effort"])} '
-            f'<span class="faded">{MEDALS[e["peak_medal"]]}</span>→{MEDALS.get(e.get("medal"), "—")}'
+            f'<span class="peak" title="{esc(peak_note(e))}">⭐</span>{MEDALS[e["peak_medal"]]}→{MEDALS.get(e.get("medal"), "—")}'
             for e in fallen)
         hall = f'<p class="hall">🏛️ <b>Hall of former glory:</b> {names}. <span class="aside">Dethroned by newer giraffes, never forgotten.</span></p>'
     return f"""
@@ -243,11 +245,11 @@ def compare(entries):
                 f'<span class="emoji">🦒</span>▶ Watch</button></div></div>')
 
     return f"""
-  <section class="compare">
-    <h2 class="section">⚖️ Side by side</h2>
+  <details class="compare">
+    <summary><h2 class="section">⚖️ Side by side</h2></summary>
     <p class="aside">Pick any two giraffes and judge them like a curator would. 🧐</p>
     <div class="pair">{side(1, best[0])}{side(2, best[1])}</div>
-  </section>"""
+  </details>"""
 
 
 def lessons(entries, failed):
@@ -338,8 +340,7 @@ def card(e, flags, order):
     if e.get("medal"):
         medal_html = f' <span class="medal" title="{e["medal"].title()} medal. {esc(WHIM)}">{MEDALS[e["medal"]]}</span>'
     if e.get("peak_medal"):
-        medal_html += (f' <span class="medal faded" title="Held {e["peak_medal"]} until dethroned on {esc(e["dethroned"])}.">'
-                       f'{MEDALS[e["peak_medal"]]}</span>')
+        medal_html += f' <span class="medal peak" title="{esc(peak_note(e))}">⭐</span>'
     score = gp(e)
     gp_class = "unknown" if score is None else "pos" if score > 0 else "neg" if score < 0 else "zero"
     vibes = vibe_row(+1, "bonus") + vibe_row(-1, "penalty")
@@ -470,7 +471,12 @@ document.querySelectorAll('.stage[data-src]').forEach(stage => {
   const faq = document.querySelector('.faq'), out = faq.querySelector('.faq-a');
   const answers = JSON.parse(document.getElementById('faq-answers').textContent);
   let i = 0;
-  const next = () => { i = (i + 1) % answers.length; out.textContent = answers[i]; };
+  // Fade out, swap while invisible, fade back in; the CSS transition does the easing.
+  const next = () => {
+    i = (i + 1) % answers.length;
+    out.classList.add('out');
+    setTimeout(() => { out.textContent = answers[i]; out.classList.remove('out'); }, 350);
+  };
   faq.addEventListener('click', next);
   if (!matchMedia('(prefers-reduced-motion: reduce)').matches) setInterval(next, 9000);
 })();
@@ -639,7 +645,15 @@ h2.section {{ font-size: 1.8rem; margin: 8px 0 14px; }}
 .flag {{ cursor: help; }}
 .meta {{ display: flex; justify-content: space-between; align-items: center; }}
 .medal {{ cursor: help; font-size: 1.15em; }}
-.faded {{ filter: grayscale(1); opacity: .5; }}
+.peak {{ cursor: help; }}
+.faq-a {{ display: inline-block; transition: opacity .35s ease, transform .35s ease; }}
+.faq-a.out {{ opacity: 0; transform: translateY(6px); }}
+@media (prefers-reduced-motion: reduce) {{ .faq-a {{ transition: none; }} }}
+.compare summary {{ cursor: pointer; list-style: none; display: flex; align-items: center; gap: 10px; }}
+.compare summary::-webkit-details-marker {{ display: none; }}
+.compare summary::after {{ content: "▸ show"; color: var(--muted); font-weight: 700; font-size: .9rem; }}
+.compare[open] summary::after {{ content: "▾ hide"; }}
+.compare summary h2 {{ margin-bottom: 0; }}
 .hall {{ margin: 14px 0 0; }}
 .faq {{ margin-top: 12px !important; padding: 10px 14px; background: var(--chip); border-radius: 12px; cursor: pointer; }}
 .compare {{ margin: 0 0 36px; }}
