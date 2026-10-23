@@ -205,32 +205,6 @@ def esc(s):
     return html.escape(str(s), quote=True)
 
 
-def podium(entries):
-    medalists = sorted((e for e in entries if e.get("medal")), key=lambda e: ["silver", "gold", "bronze"].index(e["medal"]))  # classic podium: gold in the middle
-    if not medalists:
-        return ""
-    steps = "".join(
-        f'<div class="step {e["medal"]}"><span class="big">{MEDALS[e["medal"]]}</span>'
-        f'<b>{esc(e["label"])}</b><small>{esc(e["effort"])} · {fmt_gp(e)} GP</small></div>'
-        for e in medalists
-    )
-    fallen = sorted((e for e in entries if e.get("peak_medal")), key=lambda e: -MEDAL_RANK[e["peak_medal"]])
-    hall = ""
-    if fallen:
-        names = " · ".join(
-            f'<b>{esc(e["label"])}</b> {esc(e["effort"])} '
-            f'<span class="peak" title="{esc(peak_note(e))}">⭐</span>{MEDALS[e["peak_medal"]]}→{MEDALS.get(e.get("medal"), "—")}'
-            for e in fallen)
-        hall = f'<p class="hall">🏛️ <b>Hall of former glory:</b> {names}. <span class="aside">Dethroned by newer giraffes, never forgotten.</span></p>'
-    return f"""
-  <section class="podium">
-    <h2 class="section">🎖️ Curator's whim</h2>
-    <p class="aside">{esc(WHIM)} No rubric, no appeals, no take-backs. 🦒</p>
-    <div class="steps">{steps}</div>
-    {hall}
-  </section>"""
-
-
 def compare(entries):
     """Two pickers over the herd, each feeding a stage; defaults to the two best-scoring giraffes."""
     best = sorted(entries, key=lambda e: (-(gp(e) or 0), -MEDAL_RANK[e.get("medal")]))[:2]
@@ -245,11 +219,16 @@ def compare(entries):
                 f'<span class="emoji">🦒</span>▶ Watch</button></div></div>')
 
     return f"""
-  <details class="compare">
-    <summary><h2 class="section">⚖️ Side by side</h2></summary>
-    <p class="aside">Pick any two giraffes and judge them like a curator would. 🧐</p>
-    <div class="pair">{side(1, best[0])}{side(2, best[1])}</div>
-  </details>"""
+  <section class="compare">
+    <button class="compare-toggle" type="button" aria-expanded="false" aria-controls="compare-body">
+      <span class="ct-icon" aria-hidden="true">⚖️</span>
+      <span class="ct-text"><b>Side by side</b><small>Pick any two giraffes and judge them like a curator would. 🧐</small></span>
+      <span class="ct-chev" aria-hidden="true"></span>
+    </button>
+    <div class="compare-body" id="compare-body" inert><div class="compare-inner">
+      <div class="pair">{side(1, best[0])}{side(2, best[1])}</div>
+    </div></div>
+  </section>"""
 
 
 def lessons(entries, failed):
@@ -353,7 +332,7 @@ def card(e, flags, order):
     if e["wrapper"]:
         links.append(f'<a href="{esc(e["wrapper"])}" target="_blank" rel="noopener">🎁 as delivered</a>')
     return f"""
-      <article class="card" data-order="{order}" data-gp="{'' if score is None else score}" data-size="{e['size_kb']}" data-name="{title}">
+      <article class="card{' ' + e['medal'] if e.get('medal') else ''}" data-medal="{MEDAL_RANK[e.get('medal')]}" data-order="{order}" data-gp="{'' if score is None else score}" data-size="{e['size_kb']}" data-name="{title}">
         {stage}
         <div class="body">
           <h3>{title}{medal_html} <span class="flags">{flag_html}</span></h3>
@@ -432,7 +411,8 @@ SORT_SCRIPT = """
   const num = (el, k, missing) => el.dataset[k] ? Number(el.dataset[k]) : missing;
   const keys = {
     cursed: () => 0,
-    best: (a, b) => num(b, 'gp', -Infinity) - num(a, 'gp', -Infinity),
+    // Medalists lead in podium order, then everyone else by score.
+    best: (a, b) => num(b, 'medal', 0) - num(a, 'medal', 0) || num(b, 'gp', -Infinity) - num(a, 'gp', -Infinity),
     size: (a, b) => num(b, 'size', 0) - num(a, 'size', 0),
     name: (a, b) => a.dataset.name.localeCompare(b.dataset.name),
   };
@@ -479,6 +459,16 @@ document.querySelectorAll('.stage[data-src]').forEach(stage => {
   };
   faq.addEventListener('click', next);
   if (!matchMedia('(prefers-reduced-motion: reduce)').matches) setInterval(next, 9000);
+})();
+// Side by side opens like a drawer; closing it stops both giraffes and takes it out of the tab order.
+(() => {
+  const btn = document.querySelector('.compare-toggle'), body = document.getElementById('compare-body');
+  btn.addEventListener('click', () => {
+    const open = btn.getAttribute('aria-expanded') !== 'true';
+    btn.setAttribute('aria-expanded', String(open));
+    body.inert = !open;
+    if (!open) body.querySelectorAll('.stop').forEach(s => s.click());
+  });
 })();
 // Swapping a side-by-side pick stops whatever that stage was playing.
 document.querySelectorAll('.compare .side').forEach(side => {
@@ -649,12 +639,26 @@ h2.section {{ font-size: 1.8rem; margin: 8px 0 14px; }}
 .faq-a {{ display: inline-block; transition: opacity .35s ease, transform .35s ease; }}
 .faq-a.out {{ opacity: 0; transform: translateY(6px); }}
 @media (prefers-reduced-motion: reduce) {{ .faq-a {{ transition: none; }} }}
-.compare summary {{ cursor: pointer; list-style: none; display: flex; align-items: center; gap: 10px; }}
-.compare summary::-webkit-details-marker {{ display: none; }}
-.compare summary::after {{ content: "▸ show"; color: var(--muted); font-weight: 700; font-size: .9rem; }}
-.compare[open] summary::after {{ content: "▾ hide"; }}
-.compare summary h2 {{ margin-bottom: 0; }}
-.hall {{ margin: 14px 0 0; }}
+.compare-toggle {{ width: 100%; display: flex; align-items: center; gap: 14px; text-align: left; cursor: pointer;
+  font: inherit; color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+  padding: 12px 16px; transition: border-color .2s ease, box-shadow .2s ease; }}
+.compare-toggle:hover {{ border-color: var(--accent); box-shadow: 0 4px 14px rgba(0,0,0,.06); }}
+.compare-toggle:focus-visible {{ outline: 2px solid var(--accent); outline-offset: 3px; }}
+.ct-icon {{ font-size: 1.6rem; }}
+.ct-text {{ flex: 1; display: flex; flex-direction: column; min-width: 0; }}
+.ct-text b {{ font: 700 1.25rem Fredoka, sans-serif; }}
+.ct-text small {{ color: var(--muted); }}
+.ct-chev {{ flex: none; width: 32px; height: 32px; border-radius: 50%; background: var(--chip); position: relative;
+  transition: transform .3s ease, background .2s ease; }}
+.ct-chev::before {{ content: ""; position: absolute; left: 50%; top: 45%; width: 8px; height: 8px;
+  border: solid var(--ink); border-width: 0 2.5px 2.5px 0; transform: translate(-50%, -50%) rotate(45deg); }}
+.compare-toggle:hover .ct-chev {{ background: var(--accent); }}
+.compare-toggle[aria-expanded="true"] .ct-chev {{ transform: rotate(180deg); }}
+.compare-body {{ display: grid; grid-template-rows: 0fr; transition: grid-template-rows .35s ease; }}
+.compare-toggle[aria-expanded="true"] + .compare-body {{ grid-template-rows: 1fr; }}
+.compare-inner {{ overflow: hidden; min-height: 0; }}
+.compare-inner .pair {{ padding-top: 14px; }}
+@media (prefers-reduced-motion: reduce) {{ .compare-body, .ct-chev {{ transition: none; }} }}
 .faq {{ margin-top: 12px !important; padding: 10px 14px; background: var(--chip); border-radius: 12px; cursor: pointer; }}
 .compare {{ margin: 0 0 36px; }}
 .pair {{ display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }}
@@ -663,15 +667,9 @@ h2.section {{ font-size: 1.8rem; margin: 8px 0 14px; }}
 .side select {{ font: 700 .95rem Nunito, sans-serif; color: var(--ink); background: var(--card);
   border: 2px solid var(--line); border-radius: 10px; padding: 8px 10px; max-width: 100%; }}
 .side .stage {{ border-radius: 14px; overflow: hidden; }}
-.podium {{ margin: 0 0 36px; }}
-.steps {{ display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end; }}
-.step {{ flex: 1 1 180px; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px;
-  display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; }}
-.step .big {{ font-size: 2.4rem; line-height: 1.1; }}
-.step small {{ color: var(--muted); }}
-.step.gold {{ border: 2px solid #d4a72c; padding-top: 26px; }}
-.step.silver {{ border: 2px solid #a7adb5; padding-top: 18px; }}
-.step.bronze {{ border: 2px solid #b8763e; }}
+.card.gold {{ border: 3px solid #d4a72c; box-shadow: 0 0 0 4px rgba(212,167,44,.18); }}
+.card.silver {{ border: 3px solid #a7adb5; box-shadow: 0 0 0 4px rgba(167,173,181,.2); }}
+.card.bronze {{ border: 3px solid #b8763e; box-shadow: 0 0 0 4px rgba(184,118,62,.18); }}
 .gp {{ font: 700 1.05rem Fredoka, sans-serif; padding: 2px 12px; border-radius: 999px; background: var(--chip); color: var(--ink); }}
 .gp.pos {{ background: #2f9e55; color: #fff; }} .gp.neg {{ background: #c2475e; color: #fff; }}
 .graveyard-head {{ margin-top: 40px; }}
@@ -739,7 +737,6 @@ footer {{ border-top: 1px solid var(--line); margin-top: 40px; padding: 24px 0 4
     </ul>
   </section>
   {lessons(entries, failed)}
-  {podium(entries)}
   {compare(cursed)}
 
   <div class="herd-head">
