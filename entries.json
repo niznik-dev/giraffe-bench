@@ -19,6 +19,10 @@
     "⏳": {
       "title": "The Long Walk",
       "text": "Took about 3 hours to finish with llama-server's out-of-the-box settings, no tuning. The page titled itself \"The Long Walk\", which is fair."
+    },
+    "📦": {
+      "title": "Bundled three.js",
+      "text": "Shipped three.js minified inline instead of loading it from a pinned CDN, so the page weighs in at ~560 KB."
     }
   },
   "entries": {
@@ -87,8 +91,7 @@
         "hocks": "yes",
         "frontlegs": "no",
         "flex": "yes"
-      },
-      "medal": "silver"
+      }
     },
     "chatgpt-sol-6-1/2026-10-22_medium.html": {
       "label": "ChatGPT Sol 6.1",
@@ -313,8 +316,7 @@
         "hocks": "yes",
         "frontlegs": "no",
         "flex": "yes"
-      },
-      "medal": "gold"
+      }
     },
     "claude-opus-5-5/2026-10-23_max.html": {
       "label": "Claude Opus 5.5",
@@ -330,8 +332,7 @@
         "hocks": "yes",
         "frontlegs": "no",
         "flex": "yes"
-      },
-      "medal": "bronze"
+      }
     },
     "claude-haiku-5-5/2026-10-23_max.html": {
       "label": "Claude Haiku 5.5",
@@ -367,6 +368,27 @@
         "frontlegs": "no",
         "flex": "no"
       }
+    },
+    "chatgpt-sol-6-1/2026-10-23_pro.html": {
+      "label": "ChatGPT Sol 6.1",
+      "where": "hosted",
+      "flags": [
+        "😵‍💫",
+        "📦"
+      ],
+      "three": "r180",
+      "vibes": {
+        "legs": "yes",
+        "walks": "yes",
+        "giraffe": "yes",
+        "savannah": "yes",
+        "nightmare": "no",
+        "ghost": "no",
+        "wanders": "no",
+        "hocks": "yes",
+        "frontlegs": "no",
+        "flex": "yes"
+      }
     }
   },
   "pending": [],
@@ -388,6 +410,20 @@
       "label": "SmolLM2 360M",
       "tag": "smollm2:360m",
       "epitaph": "Refused to write HTML. Its JavaScript imported 16 modules (most of which don't exist), placed one box, then wrote the same zoom handler 19 times. No giraffe was harmed, because none was made."
+    }
+  ],
+  "podiums": [
+    {
+      "since": "2026-10-22T18:55:54-04:00",
+      "gold": "chatgpt-sol-6-1/2026-10-22_xhigh.html",
+      "silver": "claude-sonnet-5-5/2026-10-22_medium.html",
+      "bronze": "claude-opus-5-5/2026-10-22_medium.html"
+    },
+    {
+      "since": "2026-10-23T16:56:03-04:00",
+      "gold": "claude-sonnet-5-5/2026-10-23_max.html",
+      "silver": "chatgpt-sol-6-1/2026-10-22_xhigh.html",
+      "bronze": "claude-opus-5-5/2026-10-23_max.html"
     }
   ]
 }

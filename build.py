@@ -31,8 +31,16 @@ VIBES = [  # (key, emoji, name, question, points)
 ]
 VIBE_KEYS = [v[0] for v in VIBES]
 MEDALS = {"gold": "🥇", "silver": "🥈", "bronze": "🥉"}
+MEDAL_RANK = {"gold": 3, "silver": 2, "bronze": 1, None: 0}
 WHIM = "Awarded entirely on the curator's whim, independent of Giraffe Points."
-README_START, README_END = "<!-- gallery:start -->", "<!-- gallery:end -->"
+JOKE_Q = "Should I really pick my LLM based on how well it builds a giraffe?"
+JOKE_AS = [
+    "Absolutely not. Unless your codebase has hind legs, in which case: check the hocks. "
+    "(Your production bugs are, statistically, also giraffe-shaped.)",
+    "Not exclusively. But a model that can't find a giraffe's knees may also struggle to find your bug.",
+    "No. But we've learned more from hocks than from most leaderboards.",
+    "Would you trust a model that gives a giraffe backwards front legs with your database migration? Think about it.",
+]
 
 
 def three_version(text):
@@ -41,6 +49,25 @@ def three_version(text):
     if m := re.search(r"three\.js/(r\d+)", text):
         return m.group(1)
     return "?"
+
+
+def apply_podiums(podiums, by_path):
+    """Medals come from the podium history (oldest first): the newest podium is current, and an entry
+    that once held a better medal gets peak_medal plus the date of the podium that knocked it down."""
+    for pod in podiums:
+        if not pod.get("since") or not all(pod.get(m) for m in MEDALS):
+            raise SystemExit(f"podium needs 'since' and all of {list(MEDALS)}: {pod}")
+        if unknown := [pod[m] for m in MEDALS if pod[m] not in by_path]:
+            raise SystemExit(f"podium {pod['since']} names giraffes with no entry: {unknown}")
+        if len({pod[m] for m in MEDALS}) < len(MEDALS):
+            raise SystemExit(f"podium {pod['since']} gives one giraffe two medals")
+    current = podiums[-1] if podiums else {}
+    for path, e in by_path.items():
+        e["medal"] = next((m for m in MEDALS if current.get(m) == path), None)
+        held = [(MEDAL_RANK[m], i) for i, pod in enumerate(podiums) for m in MEDALS if pod[m] == path]
+        if held and (peak := max(held))[0] > MEDAL_RANK[e["medal"]]:
+            e["peak_medal"] = next(m for m in MEDALS if MEDAL_RANK[m] == peak[0])
+            e["dethroned"] = podiums[peak[1] + 1]["since"][:10]
 
 
 def load_entries():
@@ -60,8 +87,8 @@ def load_entries():
         m = NAME_RE.match(file.stem)
         if not m:
             raise SystemExit(f"bad filename: {path}")
-        if info.get("medal") not in (None, *MEDALS):
-            raise SystemExit(f"{path}: medal must be one of {list(MEDALS)}")
+        if stray := {"medal", "peak_medal", "dethroned"} & info.keys():
+            raise SystemExit(f"{path}: {sorted(stray)} come from the top-level 'podiums' list; don't set them per entry")
         bad = {k: v for k, v in info.get("vibes", {}).items() if k not in VIBE_KEYS or v not in ("yes", "no")}
         if bad:
             raise SystemExit(f"{path}: bad vibes {bad}; keys {VIBE_KEYS}, values yes/no")
@@ -76,11 +103,12 @@ def load_entries():
             "flags": info.get("flags", []),
             "vibes": info.get("vibes", {}),
             "size_kb": round(file.stat().st_size / 1024),
-            "three": three_version(file.read_text(errors="ignore")),
+            "three": info.get("three") or three_version(file.read_text(errors="ignore")),  # override for bundled builds the regex can't see
             "quant": file.parent.name.rsplit("-", 1)[-1] if info["where"] == "local" else None,
             "wrapper": wrapper.relative_to(ROOT).as_posix() if wrapper.exists() else None,
         })
     entries.sort(key=lambda e: (e["date"], e["where"] != "hosted"), reverse=False)
+    apply_podiums(meta.get("podiums", []), {e["path"]: e for e in entries})
     pending = meta.get("pending", [])
     hatched = {e["slug"] for e in entries}
     if dupes := [p["slug"] for p in pending if p["slug"] in hatched]:
@@ -105,6 +133,11 @@ def fmt_gp(e):
     return "?" if (score := gp(e)) is None else f"{score:+d}"
 
 
+def former_glory(e):
+    """'was 🥇' for entries that once held a better medal than they hold now; '' otherwise."""
+    return f"was {MEDALS[e['peak_medal']]}" if e.get("peak_medal") else ""
+
+
 def readme_gallery(flags, entries, pending, failed):
     lines = ["| Model | Effort | Date | Page | GP | Vibe check | ⚑ |", "|-------|--------|------|------|----|------------|---|"]
     for e in entries:
@@ -114,9 +147,15 @@ def readme_gallery(flags, entries, pending, failed):
         unjudged = sum(k not in e["vibes"] for k in VIBE_KEYS)
         vibes = " ".join(filter(None, [bonus and f"+{bonus}", penalty and f"−{penalty}", unjudged and f"❔×{unjudged}"]))
         medal = f" {MEDALS[e['medal']]}" if e.get("medal") else ""
+        if was := former_glory(e):
+            medal += f" <sub>({was})</sub>"
         lines.append(f"| {e['slug']}{medal} | {e['effort']} | {e['date']} | [{name}]({e['path']}) | **{fmt_gp(e)}** | {vibes} | {' '.join(e['flags'])} |")
     if any(e.get("medal") for e in entries):
         lines += ["", "🎖️ **Curator's whim:** 🥇🥈🥉 medals are " + WHIM[0].lower() + WHIM[1:]]
+    if fallen := [e for e in entries if e.get("peak_medal")]:
+        lines += ["", "🏛️ **Hall of former glory:** " + " · ".join(
+            f"{e['slug']} {e['effort']} ({MEDALS[e['peak_medal']]} → {MEDALS.get(e.get('medal'), '—')}, {e['dethroned']})"
+            for e in fallen) + "."]
     lines += ["", "**Giraffe Points (GP)** = bonuses − penalties. "
               "Bonuses: " + " · ".join(f"{emoji} {name.lower()}" for _, emoji, name, _, pts in VIBES if pts > 0) + ". "
               "Penalties: " + " · ".join(f"{emoji} {name.lower()}" for _, emoji, name, _, pts in VIBES if pts < 0) + "."]
@@ -139,14 +178,23 @@ def readme_gallery(flags, entries, pending, failed):
     return "\n".join(lines)
 
 
+def readme_faq():
+    return "\n".join([f"> 🙋 **{JOKE_Q}**", ">"] + [f"> - {a}" for a in JOKE_AS])
+
+
+def splice(text, name, body):
+    start, end = f"<!-- {name}:start -->", f"<!-- {name}:end -->"
+    if start not in text or end not in text:
+        raise SystemExit(f"README.md needs {start} / {end} markers")
+    head, rest = text.split(start, 1)
+    _, tail = rest.split(end, 1)
+    return f"{head}{start}\n{body}\n{end}{tail}"
+
+
 def write_readme(flags, entries, pending, failed):
     readme = ROOT / "README.md"
-    text = readme.read_text()
-    if README_START not in text:
-        raise SystemExit(f"README.md needs {README_START} / {README_END} markers around the gallery")
-    head, rest = text.split(README_START, 1)
-    _, tail = rest.split(README_END, 1)
-    readme.write_text(f"{head}{README_START}\n{readme_gallery(flags, entries, pending, failed)}\n{README_END}{tail}")
+    text = splice(readme.read_text(), "faq", readme_faq())
+    readme.write_text(splice(text, "gallery", readme_gallery(flags, entries, pending, failed)))
 
 
 # ---------- index.html ----------
@@ -164,11 +212,41 @@ def podium(entries):
         f'<b>{esc(e["label"])}</b><small>{esc(e["effort"])} · {fmt_gp(e)} GP</small></div>'
         for e in medalists
     )
+    fallen = sorted((e for e in entries if e.get("peak_medal")), key=lambda e: -MEDAL_RANK[e["peak_medal"]])
+    hall = ""
+    if fallen:
+        names = " · ".join(
+            f'<b>{esc(e["label"])}</b> {esc(e["effort"])} '
+            f'<span class="faded">{MEDALS[e["peak_medal"]]}</span>→{MEDALS.get(e.get("medal"), "—")}'
+            for e in fallen)
+        hall = f'<p class="hall">🏛️ <b>Hall of former glory:</b> {names}. <span class="aside">Dethroned by newer giraffes, never forgotten.</span></p>'
     return f"""
   <section class="podium">
     <h2 class="section">🎖️ Curator's whim</h2>
     <p class="aside">{esc(WHIM)} No rubric, no appeals, no take-backs. 🦒</p>
     <div class="steps">{steps}</div>
+    {hall}
+  </section>"""
+
+
+def compare(entries):
+    """Two pickers over the herd, each feeding a stage; defaults to the two best-scoring giraffes."""
+    best = sorted(entries, key=lambda e: (-(gp(e) or 0), -MEDAL_RANK[e.get("medal")]))[:2]
+
+    def side(n, default):
+        options = "".join(
+            f'<option value="{esc(e["path"])}"{" selected" if e is default else ""}>'
+            f'{esc(e["label"])} · {esc(e["effort"])} ({fmt_gp(e)} GP)</option>'
+            for e in sorted(entries, key=lambda e: (e["label"], e["effort"])))
+        return (f'<div class="side"><select aria-label="Giraffe {n}">{options}</select>'
+                f'<div class="stage" data-src="{esc(default["path"])}"><button class="start" type="button">'
+                f'<span class="emoji">🦒</span>▶ Watch</button></div></div>')
+
+    return f"""
+  <section class="compare">
+    <h2 class="section">⚖️ Side by side</h2>
+    <p class="aside">Pick any two giraffes and judge them like a curator would. 🧐</p>
+    <div class="pair">{side(1, best[0])}{side(2, best[1])}</div>
   </section>"""
 
 
@@ -259,6 +337,9 @@ def card(e, flags, order):
     medal_html = ""
     if e.get("medal"):
         medal_html = f' <span class="medal" title="{e["medal"].title()} medal. {esc(WHIM)}">{MEDALS[e["medal"]]}</span>'
+    if e.get("peak_medal"):
+        medal_html += (f' <span class="medal faded" title="Held {e["peak_medal"]} until dethroned on {esc(e["dethroned"])}.">'
+                       f'{MEDALS[e["peak_medal"]]}</span>')
     score = gp(e)
     gp_class = "unknown" if score is None else "pos" if score > 0 else "neg" if score < 0 else "zero"
     vibes = vibe_row(+1, "bonus") + vibe_row(-1, "penalty")
@@ -383,6 +464,23 @@ document.querySelectorAll('.stage[data-src]').forEach(stage => {
     stop.addEventListener('click', () => { stage.innerHTML = idle; });
     stage.append(f, stop);
   });
+});
+// The FAQ answer rotates on a timer (unless motion is reduced) and on click.
+(() => {
+  const faq = document.querySelector('.faq'), out = faq.querySelector('.faq-a');
+  const answers = JSON.parse(document.getElementById('faq-answers').textContent);
+  let i = 0;
+  const next = () => { i = (i + 1) % answers.length; out.textContent = answers[i]; };
+  faq.addEventListener('click', next);
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) setInterval(next, 9000);
+})();
+// Swapping a side-by-side pick stops whatever that stage was playing.
+document.querySelectorAll('.compare .side').forEach(side => {
+  const stage = side.querySelector('.stage');
+  side.querySelector('select').addEventListener('change', ev => {
+    stage.querySelector('.stop')?.click();
+    stage.dataset.src = ev.target.value;
+  });
 });"""
 
 
@@ -444,6 +542,7 @@ def render_index(flags, entries, pending, failed):
     cursed = sorted(entries, key=lambda e: (gp(e) is None, gp(e) or 0, e["label"], e["effort"]))
     cards = "".join(card(e, flags, i) for i, e in enumerate(cursed))
     models = len({e["slug"] for e in entries})
+    faq_json = json.dumps(JOKE_AS).replace("</", "<\\/")  # safe inside <script>
     legend = "".join(
         f'<li><span class="flag">{f}</span> <b>{esc(v["title"])}.</b> {esc(v["text"])}</li>' for f, v in flags.items()
     )
@@ -540,6 +639,16 @@ h2.section {{ font-size: 1.8rem; margin: 8px 0 14px; }}
 .flag {{ cursor: help; }}
 .meta {{ display: flex; justify-content: space-between; align-items: center; }}
 .medal {{ cursor: help; font-size: 1.15em; }}
+.faded {{ filter: grayscale(1); opacity: .5; }}
+.hall {{ margin: 14px 0 0; }}
+.faq {{ margin-top: 12px !important; padding: 10px 14px; background: var(--chip); border-radius: 12px; cursor: pointer; }}
+.compare {{ margin: 0 0 36px; }}
+.pair {{ display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }}
+@media (max-width: 760px) {{ .pair {{ grid-template-columns: 1fr; }} }}
+.side {{ display: flex; flex-direction: column; gap: 8px; min-width: 0; }}
+.side select {{ font: 700 .95rem Nunito, sans-serif; color: var(--ink); background: var(--card);
+  border: 2px solid var(--line); border-radius: 10px; padding: 8px 10px; max-width: 100%; }}
+.side .stage {{ border-radius: 14px; overflow: hidden; }}
 .podium {{ margin: 0 0 36px; }}
 .steps {{ display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end; }}
 .step {{ flex: 1 1 180px; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px;
@@ -605,6 +714,8 @@ footer {{ border-top: 1px solid var(--line); margin-top: 40px; padding: 24px 0 4
     <h2>⚠️ This is a Very Serious Benchmark™ (it is not)</h2>
     <p>One giraffe per model, one prompt, zero rubric. Scoring is by vibes and leg count. Hosted models ran on their
     vendors' servers; local ones ran on a laptop. Treat it as a field guide, not a leaderboard.</p>
+    <p class="faq" title="Click for another answer"><b>🙋 {esc(JOKE_Q)}</b><br><span class="faq-a" aria-live="polite">{esc(JOKE_AS[0])}</span></p>
+    <script type="application/json" id="faq-answers">{faq_json}</script>
     <p>Still, a herd shows patterns a single giraffe can't. Here's what we've spotted so far 👇</p>
     <ul class="stats">
       <li><a class="wiki" href="{WIKI_GIRAFFE}" target="_blank" rel="noopener" title="Meet a real giraffe (Wikipedia)">🦒</a> {len(entries)} giraffes</li><li>🧬 {models} models</li>
@@ -615,6 +726,7 @@ footer {{ border-top: 1px solid var(--line); margin-top: 40px; padding: 24px 0 4
   </section>
   {lessons(entries, failed)}
   {podium(entries)}
+  {compare(cursed)}
 
   <div class="herd-head">
     <h2 class="section">The herd</h2>

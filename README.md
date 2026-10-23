@@ -7,6 +7,15 @@ A herd of single-page three.js sites, each one an LLM's answer to the same promp
 **🌍 Live gallery: <https://niznik-dev.github.io/giraffe-bench/>.** Click any page below to watch the
 giraffe (hopefully) walk.
 
+<!-- faq:start -->
+> 🙋 **Should I really pick my LLM based on how well it builds a giraffe?**
+>
+> - Absolutely not. Unless your codebase has hind legs, in which case: check the hocks. (Your production bugs are, statistically, also giraffe-shaped.)
+> - Not exclusively. But a model that can't find a giraffe's knees may also struggle to find your bug.
+> - No. But we've learned more from hocks than from most leaderboards.
+> - Would you trust a model that gives a giraffe backwards front legs with your database migration? Think about it.
+<!-- faq:end -->
+
 Started as a live demo for the October 2026 meeting of Princeton Research Computing's
 [LLM Collective](https://researchcomputing.princeton.edu/learn/user-groups/llm-collective).
 Thanks to [Pedro Espino](https://github.com/pilambdaepsilon) for suggesting the giraffe, and to
@@ -18,10 +27,10 @@ for the original idea of testing models on 3D creation.
 <!-- gallery:start -->
 | Model | Effort | Date | Page | GP | Vibe check | ⚑ |
 |-------|--------|------|------|----|------------|---|
-| claude-opus-5-5 | medium | 2026-10-22 | [2026-10-22_medium.html](claude-opus-5-5/2026-10-22_medium.html) | **+5** | +🦵🚶🤸🦒🌅 |  |
-| claude-sonnet-5-5 | medium | 2026-10-22 | [2026-10-22_medium.html](claude-sonnet-5-5/2026-10-22_medium.html) | **+5** | +🦵🚶🤸🦒🌅 |  |
+| claude-opus-5-5 <sub>(was 🥉)</sub> | medium | 2026-10-22 | [2026-10-22_medium.html](claude-opus-5-5/2026-10-22_medium.html) | **+5** | +🦵🚶🤸🦒🌅 |  |
+| claude-sonnet-5-5 <sub>(was 🥈)</sub> | medium | 2026-10-22 | [2026-10-22_medium.html](claude-sonnet-5-5/2026-10-22_medium.html) | **+5** | +🦵🚶🤸🦒🌅 |  |
 | claude-haiku-5-5 | medium | 2026-10-22 | [2026-10-22_medium.html](claude-haiku-5-5/2026-10-22_medium.html) | **+4** | +🦵🚶🤸🦴🌅 −🔄 |  |
-| chatgpt-sol-6-1 🥈 | xhigh | 2026-10-22 | [2026-10-22_xhigh.html](chatgpt-sol-6-1/2026-10-22_xhigh.html) | **+6** | +🦵🚶🤸🦴🦒🌅 | 😵‍💫 |
+| chatgpt-sol-6-1 🥈 <sub>(was 🥇)</sub> | xhigh | 2026-10-22 | [2026-10-22_xhigh.html](chatgpt-sol-6-1/2026-10-22_xhigh.html) | **+6** | +🦵🚶🤸🦴🦒🌅 | 😵‍💫 |
 | chatgpt-sol-6-1 | medium | 2026-10-22 | [2026-10-22_medium.html](chatgpt-sol-6-1/2026-10-22_medium.html) | **+4** | +🦵🚶🤸🦴🦒🌅 −🔄👻 | 😵‍💫 |
 | gemini-4-argon | medium | 2026-10-22 | [2026-10-22_medium.html](gemini-4-argon/2026-10-22_medium.html) | **+5** | +🦵🚶🤸🦴🦒🌅 −🔄 |  |
 | gemini-4-argon | high | 2026-10-22 | [2026-10-22_high.html](gemini-4-argon/2026-10-22_high.html) | **+5** | +🦵🚶🤸🦒🌅 |  |
@@ -35,10 +44,13 @@ for the original idea of testing models on 3D creation.
 | claude-sonnet-5-5 🥇 | max | 2026-10-23 | [2026-10-23_max.html](claude-sonnet-5-5/2026-10-23_max.html) | **+6** | +🦵🚶🤸🦴🦒🌅 |  |
 | claude-opus-5-5 🥉 | max | 2026-10-23 | [2026-10-23_max.html](claude-opus-5-5/2026-10-23_max.html) | **+5** | +🦵🚶🤸🦴🦒🌅 −😱 |  |
 | claude-haiku-5-5 | max | 2026-10-23 | [2026-10-23_max.html](claude-haiku-5-5/2026-10-23_max.html) | **+5** | +🦵🚶🤸🦒🌅 |  |
+| chatgpt-sol-6-1 | pro | 2026-10-23 | [2026-10-23_pro.html](chatgpt-sol-6-1/2026-10-23_pro.html) | **+6** | +🦵🚶🤸🦴🦒🌅 | 😵‍💫 📦 |
 | qwen3-8-27b-udq4kxl | default | 2026-10-23 | [2026-10-23_default.html](qwen3-8-27b-udq4kxl/2026-10-23_default.html) | **+5** | +🦵🚶🤸🦒🌅 | 🦙 ⏳ |
 | nemotron-3-5-bolt-e4b-udq8kxl | default | 2026-10-23 | [2026-10-23_default.html](nemotron-3-5-bolt-e4b-udq8kxl/2026-10-23_default.html) | **-1** | −🚪 | 🦙 |
 
 🎖️ **Curator's whim:** 🥇🥈🥉 medals are awarded entirely on the curator's whim, independent of Giraffe Points.
+
+🏛️ **Hall of former glory:** claude-opus-5-5 medium (🥉 → —, 2026-10-23) · claude-sonnet-5-5 medium (🥈 → —, 2026-10-23) · chatgpt-sol-6-1 xhigh (🥇 → 🥈, 2026-10-23).
 
 **Giraffe Points (GP)** = bonuses − penalties. Bonuses: 🦵 four legs · 🚶 actually walks · 🤸 legs flex · 🦴 proper hocks · 🦒 giraffe-shaped · 🌅 real savannah. Penalties: 😱 nightmare fuel · 🔄 backwards front legs · 👻 ghost giraffe · 🚪 wanders off.
 
@@ -64,6 +76,8 @@ Originals: [chatgpt-sol-6-1 xhigh](chatgpt-sol-6-1/2026-10-22_xhigh.wrapper.html
 🦙 **llama-server run.** Same MacBook Pro (Apple M2 Pro, 32 GB), but Cherry Studio → llama.cpp's llama-server instead of Ollama, loading an Unsloth UD GGUF (quant in the folder name). Effort is Cherry's thinking setting.
 
 ⏳ **The Long Walk.** Took about 3 hours to finish with llama-server's out-of-the-box settings, no tuning. The page titled itself "The Long Walk", which is fair.
+
+📦 **Bundled three.js.** Shipped three.js minified inline instead of loading it from a pinned CDN, so the page weighs in at ~560 KB.
 
 🪦 **Graveyard: Qwen 3.5 9B** (`qwen3.5:9b-mlx`). Spent three rounds of "Audit the file - there seems to be an error" assuring us the savannah was loading. The savannah is still loading.
 
@@ -127,7 +141,7 @@ qwen3-27b-q4km/
 | `model-slug` | Lowercase kebab-case; dots and spaces → `-`; drop vendor prefixes, but keep a product name when the model name is obscure without it | `claude-opus-5-5`, `qwen3-27b`, `chatgpt-sol-6-1` |
 | `-quant` (local models) | Appended to the model slug: lowercase, punctuation dropped. Hosted models omit it. Runtime (Ollama, llama.cpp, transformers…) goes in the 💻 legend | `qwen3-27b-q4km/`, `qwen3-27b-bf16/` |
 | `YYYY-MM-DD` | Date the page was **generated** (use the date collected if unknown) | `2026-10-22` |
-| `_effort` | Reasoning effort, lowercase, **no hyphens** (they'd clash with `-n`); omit if the model has no such setting. Local runs use Cherry Studio's thinking setting as chosen; the 💻 legend gives a best guess at the level Ollama ran | `_low`, `_medium`, `_high`, `_xhigh`, `_max`; local: `_default`, `_off`, `_auto` |
+| `_effort` | Reasoning effort, lowercase, **no hyphens** (they'd clash with `-n`); omit if the model has no such setting. Local runs use Cherry Studio's thinking setting as chosen; the 💻 legend gives a best guess at the level Ollama ran | `_low`, `_medium`, `_high`, `_xhigh`, `_max`, `_pro` (ChatGPT Pro, above xhigh); local: `_default`, `_off`, `_auto` |
 | `-n` suffix | Only for duplicates with the same model, day, and effort, starting at `-2` | `2026-10-22_medium-2.html` |
 | `.wrapper` | The original, unedited file, when the entry had to be extracted from a vendor wrapper | `2026-10-22_xhigh.wrapper.html` |
 
